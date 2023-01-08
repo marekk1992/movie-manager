@@ -1,24 +1,25 @@
-package com.example.moviemanager.service;
+package com.example.moviemanager.controller;
 
+import com.example.moviemanager.service.MovieNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+
+import java.time.LocalDateTime;
 
 @ControllerAdvice
 public class MovieExceptionHandler {
 
     @ExceptionHandler
     public ResponseEntity<ApiError> handleException(Exception exc) {
-        ApiError apiError = new ApiError(HttpStatus.BAD_REQUEST.value(), exc.getMessage(), System.currentTimeMillis());
-
-        return new ResponseEntity<>(apiError, HttpStatus.BAD_REQUEST);
+        ApiError apiError = new ApiError(HttpStatus.INTERNAL_SERVER_ERROR.value(), exc.getMessage(), LocalDateTime.now());
+        return new ResponseEntity<>(apiError, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
     @ExceptionHandler
     public ResponseEntity<ApiError> handleException(MovieNotFoundException exc) {
-        ApiError apiError = new ApiError(HttpStatus.NOT_FOUND.value(), exc.getMessage(), System.currentTimeMillis());
-
+        ApiError apiError = new ApiError(HttpStatus.NOT_FOUND.value(), exc.getMessage(), LocalDateTime.now());
         return new ResponseEntity<>(apiError, HttpStatus.NOT_FOUND);
     }
 }

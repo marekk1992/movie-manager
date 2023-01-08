@@ -1,15 +1,17 @@
-package com.example.moviemanager.service;
+package com.example.moviemanager.controller;
+
+import java.time.LocalDateTime;
 
 public class ApiError {
 
     private int status;
     private String message;
-    private long timeStamp;
+    private LocalDateTime localDateTime;
 
-    public ApiError(int status, String message, long timeStamp) {
+    public ApiError(int status, String message, LocalDateTime localDateTime) {
         this.status = status;
         this.message = message;
-        this.timeStamp = timeStamp;
+        this.localDateTime = localDateTime;
     }
 
     public int getStatus() {
@@ -28,11 +30,11 @@ public class ApiError {
         this.message = message;
     }
 
-    public long getTimeStamp() {
-        return timeStamp;
+    public LocalDateTime getLocalDateTime() {
+        return localDateTime;
     }
 
-    public void setTimeStamp(long timeStamp) {
-        this.timeStamp = timeStamp;
+    public void setLocalDateTime(LocalDateTime localDateTime) {
+        this.localDateTime = localDateTime;
     }
 }

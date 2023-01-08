@@ -1,4 +1,4 @@
-package com.example.moviemanager.entity;
+package com.example.moviemanager.repository;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -58,7 +58,7 @@ public class Movie {
                 ", rating=" + rating +
                 '}';
     }
-    
+
     public int getId() {
         return id;
     }

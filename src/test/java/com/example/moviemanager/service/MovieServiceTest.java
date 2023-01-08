@@ -1,12 +1,12 @@
 package com.example.moviemanager.service;
 
-import com.example.moviemanager.entity.Movie;
-import com.example.moviemanager.repo.MovieRepository;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import com.example.moviemanager.repository.Movie;
+import com.example.moviemanager.repository.MovieRepository;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,17 +22,17 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
-@RunWith(MockitoJUnitRunner.class)
-public class MovieServiceTests {
+@ExtendWith(MockitoExtension.class)
+public class MovieServiceTest {
 
     @Mock
     private MovieRepository movieRepository;
 
     @InjectMocks
-    private MovieServiceImpl movieService;
+    private MovieService movieService;
 
     @Test
-    public void returns_list_of_all_movies() {
+    void returns_list_of_all_movies() {
         // given
         Movie movie1 = new Movie(1, "Home Alone", "Christmas movie", 1990, 8.5);
         Movie movie2 = new Movie(2, "Home Alone 2", "Christmas movie", 1992, 8.9);
@@ -51,11 +51,11 @@ public class MovieServiceTests {
     }
 
     @Test
-    public void throws_exception_when_trying_to_find_non_existing_movie() { // TODO review
+    void throws_exception_when_trying_to_find_non_existing_movie() {
         // given
-        int id = 2;
-        String expectedMessage = "Could not find Movie by id - " + id;
-        when(movieRepository.findById(2)).thenThrow(new MovieNotFoundException(("Could not find Movie by id - " + id)));
+        int movieId = 2;
+        String expectedMessage = "Could not find Movie by id - " + movieId;
+        when(movieRepository.findById(2)).thenThrow(new MovieNotFoundException(("Could not find Movie by id - " + movieId)));
 
         // when
         MovieNotFoundException thrown =
@@ -67,7 +67,7 @@ public class MovieServiceTests {
     }
 
     @Test
-    public void returns_exactly_one_movie() {
+    void returns_exactly_one_movie() {
         // given
         Movie expectedMovie = new Movie(1, "Home Alone", "Christmas movie", 1990, 8.5);
         when(movieRepository.findById(1)).thenReturn(Optional.of(expectedMovie));
@@ -80,10 +80,10 @@ public class MovieServiceTests {
     }
 
     @Test
-    public void throws_exception_when_trying_to_delete_non_existing_movie() {
+    void throws_exception_when_trying_to_delete_non_existing_movie() {
         // given
-        int id = 2;
-        String expectedMessage = "Could not find Movie by id - " + id;
+        int movieId = 2;
+        String expectedMessage = "Could not find Movie by id - " + movieId;
         doThrow(new MovieNotFoundException(expectedMessage)).when(movieRepository).deleteById(2);
 
         // when
@@ -96,7 +96,7 @@ public class MovieServiceTests {
     }
 
     @Test
-    public void deletes_one_movie() {
+    void deletes_one_movie() {
         // given
         int movieId = 1;
         doNothing().when(movieRepository).deleteById(movieId);
@@ -110,7 +110,7 @@ public class MovieServiceTests {
     }
 
     @Test
-    public void saves_one_movie() {
+    void saves_one_movie() {
         // given
         Movie expected = new Movie(1, "Home Alone", "Christmas movie", 1990, 8.5);
         when(movieRepository.save(expected)).thenReturn(expected);
@@ -120,5 +120,40 @@ public class MovieServiceTests {
 
         // then
         assertEquals(expected, actual);
+    }
+
+    @Test
+    void updates_one_movie() {
+        // given
+        int movieId = 1;
+        when(movieRepository.findById(movieId))
+                .thenReturn(Optional.of(new Movie(movieId, "Home Alone 2", "Comedy", 1992, 9.0)));
+
+        Movie expected = new Movie(5, "Home Alone", "Christmas movie", 1990, 8.5);
+        expected.setId(movieId);
+        when(movieRepository.save(expected)).thenReturn(expected);
+
+        // when
+        Movie actual = movieService.update(movieId, expected);
+
+        // then
+        assertEquals(expected, actual);
+    }
+
+    @Test
+    void throws_exception_when_trying_to_update_non_existing_movie() {
+        // given
+        int movieId = 5;
+        Movie movie = new Movie(1, "Home Alone", "Christmas movie", 1990, 8.5);
+        String expectedMessage = "Update failed. Could not find movie by id - " + movieId;
+        doThrow(new MovieNotFoundException(expectedMessage)).when(movieRepository).findById(5);
+
+        // when
+        MovieNotFoundException thrown =
+                assertThrows(MovieNotFoundException.class, () -> movieService.update(movieId, movie));
+        String actualMessage = thrown.getMessage();
+
+        // then
+        assertEquals(expectedMessage, actualMessage);
     }
 }

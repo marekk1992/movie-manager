@@ -1,6 +1,6 @@
 package com.example.moviemanager.controller;
 
-import com.example.moviemanager.entity.Movie;
+import com.example.moviemanager.repository.Movie;
 import com.example.moviemanager.service.MovieNotFoundException;
 import com.example.moviemanager.service.MovieService;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -14,6 +14,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.hamcrest.Matchers.blankString;
 import static org.hamcrest.Matchers.containsString;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
@@ -26,11 +27,10 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest
-public class MovieRestControllerTests {
+public class MovieControllerTest {
 
     @MockBean
     private MovieService movieService;
@@ -42,7 +42,7 @@ public class MovieRestControllerTests {
     private ObjectMapper objectMapper;
 
     @Test
-    public void returns_list_of_all_movies() throws Exception {
+    void returns_list_of_all_movies() throws Exception {
         // given
         List<Movie> movies = new ArrayList<>();
         movies.add(new Movie(1, "Home Alone", "Christmas movie", 1990, 8.5));
@@ -53,13 +53,11 @@ public class MovieRestControllerTests {
         // then
         mockMvc.perform(get("/movies"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.size()").value(movies.size()))
-                .andExpect(content().string(objectMapper.writeValueAsString(movies)))
-                .andDo(print());
+                .andExpect(content().string(objectMapper.writeValueAsString(movies)));
     }
 
     @Test
-    public void returns_movie_by_given_id() throws Exception {
+    void returns_movie_by_given_id() throws Exception {
         // given
         int movieId = 1;
         Movie movie = new Movie(movieId, "Home Alone", "Christmas movie", 1990, 8.5);
@@ -69,12 +67,11 @@ public class MovieRestControllerTests {
         // then
         mockMvc.perform(get("/movies/{movieId}", movieId))
                 .andExpect(status().isOk())
-                .andExpect(content().string(objectMapper.writeValueAsString(movie)))
-                .andDo(print());
+                .andExpect(content().string(objectMapper.writeValueAsString(movie)));
     }
 
     @Test
-    public void throws_exception_when_trying_to_get_non_existing_movie() throws Exception {
+    void throws_exception_when_trying_to_get_non_existing_movie() throws Exception {
         // given
         int movieId = 1;
         String message = "Could not find Movie by id - " + movieId;
@@ -84,73 +81,69 @@ public class MovieRestControllerTests {
         // then
         mockMvc.perform(get("/movies/{movieId}", movieId))
                 .andExpect(status().isNotFound())
-                .andExpect(content().string(containsString(message)))
-                .andDo(print());
+                .andExpect(content().string(containsString(message)));
     }
 
     @Test
-    public void saves_movie() throws Exception {
+    void saves_movie() throws Exception {
         // given
         Movie movie = new Movie(1, "Home Alone", "Christmas movie", 1990, 8.5);
         String jsonMovie = objectMapper.writeValueAsString(movie);
 
         given(movieService.save(any(Movie.class))).
-                willAnswer((invocation)-> invocation.getArgument(0));
+                willAnswer((invocation) -> invocation.getArgument(0));
 
         // then
         mockMvc.perform(post("/movies")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(jsonMovie))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(jsonMovie))
                 .andExpect(status().isCreated())
-                .andExpect(content().string(jsonMovie))
-                .andDo(print());
+                .andExpect(content().string(jsonMovie));
     }
 
     @Test
-    public void deletes_movie_by_given_id() throws Exception {
+    void deletes_movie_by_given_id() throws Exception {
         // given
         int movieId = 1;
-        String message = "Deleted movie with id - " + movieId;
-
         doNothing().when(movieService).deleteById(movieId);
 
         // then
         mockMvc.perform(delete("/movies/{movieId}", movieId))
                 .andExpect(status().isOk())
-                .andExpect(content().string(message))
-                .andDo(print());
+                .andExpect(content().string(blankString()));
     }
 
     @Test
-    public void throws_exception_when_trying_to_delete_non_existing_movie() throws Exception {
+    void throws_exception_when_trying_to_delete_non_existing_movie() throws Exception {
         // given
         int movieId = 1;
-        String message = "Could not find Movie by id - " + movieId;
+        String message = "Deletion failed. Could not find movie with id - " + movieId;
 
         doThrow(new MovieNotFoundException(message)).when(movieService).deleteById(movieId);
 
         // then
         mockMvc.perform(delete("/movies/{movieId}", movieId))
                 .andExpect(status().isNotFound())
-                .andExpect(content().string(containsString(message)))
-                .andDo(print());
+                .andExpect(content().string(containsString(message)));
     }
 
+    // TODO: must be updated
     @Test
-    public void updates_movie() throws Exception {
+    void updates_movie() throws Exception {
         // given
+        int movieId = 1;
         Movie movie = new Movie(1, "Home Alone", "Christmas movie", 1990, 8.5);
         String jsonMovie = objectMapper.writeValueAsString(movie);
 
-        given(movieService.save(any(Movie.class))).
-                willAnswer((invocation)-> invocation.getArgument(0));
+        given(movieService.update(any(Integer.class), any(Movie.class))).
+                willAnswer((invocation) -> invocation.getArgument(1));
 
         // then
-        mockMvc.perform(put("/movies")
+        mockMvc.perform(put("/movies/{movieId}", movieId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(jsonMovie))
-                        .andDo(print())
-                        .andExpect(status().isOk())
-                        .andExpect(content().string(jsonMovie));
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(content().string(jsonMovie));
     }
 }
