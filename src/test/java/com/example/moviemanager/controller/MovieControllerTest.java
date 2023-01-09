@@ -16,8 +16,6 @@ import java.util.List;
 
 import static org.hamcrest.Matchers.blankString;
 import static org.hamcrest.Matchers.containsString;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
@@ -25,7 +23,6 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -89,9 +86,7 @@ public class MovieControllerTest {
         // given
         Movie movie = new Movie(1, "Home Alone", "Christmas movie", 1990, 8.5);
         String jsonMovie = objectMapper.writeValueAsString(movie);
-
-        given(movieService.save(any(Movie.class))).
-                willAnswer((invocation) -> invocation.getArgument(0));
+        when(movieService.save(movie)).thenReturn(movie);
 
         // then
         mockMvc.perform(post("/movies")
@@ -127,23 +122,38 @@ public class MovieControllerTest {
                 .andExpect(content().string(containsString(message)));
     }
 
-    // TODO: must be updated
     @Test
     void updates_movie() throws Exception {
         // given
         int movieId = 1;
-        Movie movie = new Movie(1, "Home Alone", "Christmas movie", 1990, 8.5);
+        Movie movie = new Movie(5, "Home Alone", "Christmas movie", 1990, 8.5);
+        Movie expectedMovie = new Movie(movieId, "Home Alone", "Christmas movie", 1990, 8.5);
         String jsonMovie = objectMapper.writeValueAsString(movie);
-
-        given(movieService.update(any(Integer.class), any(Movie.class))).
-                willAnswer((invocation) -> invocation.getArgument(1));
+        String expectedJsonMovie = objectMapper.writeValueAsString(expectedMovie);
+        when(movieService.update(movieId, movie)).thenReturn(expectedMovie);
 
         // then
         mockMvc.perform(put("/movies/{movieId}", movieId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(jsonMovie))
-                .andDo(print())
                 .andExpect(status().isOk())
-                .andExpect(content().string(jsonMovie));
+                .andExpect(content().string(expectedJsonMovie));
+    }
+
+    @Test
+    void throws_exception_when_trying_to_update_non_existing_movie() throws Exception {
+        // given
+        int movieId = 1;
+        Movie movie = new Movie(5, "Home Alone", "Christmas movie", 1990, 8.5);
+        String jsonMovie = objectMapper.writeValueAsString(movie);
+        String message = "Update failed. Could not find movie by id - " + movieId;
+        doThrow(new MovieNotFoundException(message)).when(movieService).update(movieId, movie);
+
+        // then
+        mockMvc.perform(put("/movies/{movieId}", movieId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(jsonMovie))
+                .andExpect(status().isNotFound())
+                .andExpect(content().string(containsString(message)));
     }
 }

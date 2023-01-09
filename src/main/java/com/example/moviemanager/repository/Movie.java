@@ -17,7 +17,7 @@ public class Movie {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
+    private Integer id;
 
     @Column(name = "title")
     @NotBlank(message = "Title is mandatory.")
@@ -57,6 +57,24 @@ public class Movie {
                 ", releaseYear=" + releaseYear +
                 ", rating=" + rating +
                 '}';
+    }
+
+    @Override
+    public int hashCode() {
+        return id.hashCode();
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null || obj.getClass() != this.getClass()) {
+            return false;
+        }
+        Movie movie = (Movie) obj;
+
+        return this.id.equals(movie.id);
     }
 
     public int getId() {
