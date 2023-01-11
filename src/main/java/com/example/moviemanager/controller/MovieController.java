@@ -1,6 +1,6 @@
 package com.example.moviemanager.controller;
 
-import com.example.moviemanager.repository.Movie;
+import com.example.moviemanager.repository.model.Movie;
 import com.example.moviemanager.service.MovieService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -43,7 +43,7 @@ public class MovieController {
     }
 
     @PutMapping("/{movieId}")
-    public Movie updateMovie(@Valid @PathVariable int movieId, @RequestBody Movie movie) {
+    public Movie updateMovie(@Valid @RequestBody Movie movie, @PathVariable int movieId) {
         return movieService.update(movieId, movie);
     }
 

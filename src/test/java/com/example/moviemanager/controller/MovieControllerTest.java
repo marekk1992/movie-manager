@@ -1,7 +1,7 @@
 package com.example.moviemanager.controller;
 
-import com.example.moviemanager.repository.Movie;
-import com.example.moviemanager.service.MovieNotFoundException;
+import com.example.moviemanager.repository.model.Movie;
+import com.example.moviemanager.exception.MovieNotFoundException;
 import com.example.moviemanager.service.MovieService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
@@ -11,7 +11,6 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import static org.hamcrest.Matchers.blankString;
@@ -41,10 +40,9 @@ public class MovieControllerTest {
     @Test
     void returns_list_of_all_movies() throws Exception {
         // given
-        List<Movie> movies = new ArrayList<>();
-        movies.add(new Movie(1, "Home Alone", "Christmas movie", 1990, 8.5));
-        movies.add(new Movie(2, "Home Alone 2", "Christmas movie", 1992, 8.9));
-
+        List<Movie> movies = List.of(
+                new Movie(1, "Home Alone", "Christmas movie", 1990, 8.5),
+                new Movie(2, "Home Alone 2", "Christmas movie", 1992, 8.9));
         when(movieService.findAll()).thenReturn(movies);
 
         // then

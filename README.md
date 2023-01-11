@@ -23,10 +23,11 @@ Before running this API, I assume that you have successfully installed the follo
 
     $ docker run -it --name my_database -p 5432:5432 -e POSTGRES_USER=movieuser -e POSTGRES_PASSWORD=postgres123 postgres
 
-*Notes:
+*Notes
 - Container name - my_database;
 - Image - postgres;
-- In PostgreSQL it is typical to use port 5432.
+- In PostgreSQL it is typical to use port 5432;
+- PostgreSQL version - 15.1.
 
 Now your database system is ready to accept connections.
 You could connect to DB in any tool that allows you to communicate with it.
@@ -38,20 +39,11 @@ You could connect to DB in any tool that allows you to communicate with it.
 - User: movieuser;
 - Password: postgres123.
 
-`Step 3` - make a copy of repository at your location.
-Navigate to your preferred directory where your want to place repository:
-
-    $ cd <your_directory>
-
-Clone this repository:
-
-    $ git clone <repo>
-
-`Step 4` - in your DB tool execute `movie_directory.sql` script.
+`Step 3` - in your DB tool execute `movie_directory.sql` script.
 You could find it in cloned repo `src/main/resources/`. After executing script 'movie_directory' schema
 and 'movie' table with five columns inside: 'id', 'title', 'description', 'release_year' and 'rating' will be created.
 
-`Step 5` - indicate DB connection details in your application's properties file `src/main/resources/application.properties`:
+`Step 4` - indicate DB connection details in your application's properties file `src/main/resources/application.properties`:
 - `spring.datasource.url` = jdbc:postgresql://localhost:5432/postgres
 - `spring.datasource.username` = movieuser
 - `spring.datasource.password` = postgres123
@@ -60,7 +52,7 @@ and 'movie' table with five columns inside: 'id', 'title', 'description', 'relea
 *In my project I have used default 'postgres' database.
 You are free to use different connection details but remember to change them in all occurrences.
 
-`Step 6` - run API.
+`Step 5` - run API.
 
 Navigate to root the project and execute command:
 
@@ -72,16 +64,7 @@ Now you could open your API client tool or web browser and test application.
 
     $ mvn clean test
 
-## 3. How to use API
-
-The Movie Manager REST API supports following Http requests:
-
-- `GET` - for retrieving all movies from database, or specific movie by indicating it`s id;
-- `POST` - for creating new movie;
-- `DELETE` - for deleting existing movie;
-- `PUT` - for updating existing movie;
-
-## 4. Technologies and Frameworks
+## 3. Technologies and Frameworks
 
 - SpringBoot;
 - Spring Data Rest;

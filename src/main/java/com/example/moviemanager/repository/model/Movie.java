@@ -1,4 +1,4 @@
-package com.example.moviemanager.repository;
+package com.example.moviemanager.repository.model;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
