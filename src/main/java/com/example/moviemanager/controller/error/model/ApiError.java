@@ -1,4 +1,4 @@
-package com.example.moviemanager.error.model;
+package com.example.moviemanager.controller.error.model;
 
 import org.springframework.http.HttpStatus;
 

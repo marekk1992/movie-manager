@@ -3,8 +3,8 @@ spring:
     url: jdbc:postgresql://localhost:5432/postgres
     username: movieuser
     password: postgres123
-    hikari:
-      schema: movie_directory
+  flyway:
+    schemas: movie_directory
   jpa:
     properties:
       hibernate:

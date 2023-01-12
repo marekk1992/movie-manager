@@ -1,6 +1,6 @@
 package com.example.moviemanager.service;
 
-import com.example.moviemanager.exception.MovieNotFoundException;
+import com.example.moviemanager.service.exception.MovieNotFoundException;
 import com.example.moviemanager.repository.model.Movie;
 import com.example.moviemanager.repository.MovieRepository;
 import org.springframework.dao.EmptyResultDataAccessException;

@@ -1,7 +1,7 @@
 package com.example.moviemanager.controller;
 
+import com.example.moviemanager.service.exception.MovieNotFoundException;
 import com.example.moviemanager.repository.model.Movie;
-import com.example.moviemanager.exception.MovieNotFoundException;
 import com.example.moviemanager.service.MovieService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
@@ -52,11 +52,10 @@ public class MovieControllerTest {
     }
 
     @Test
-    void returns_movie_by_given_id() throws Exception {
+    void returns_movie_by_id() throws Exception {
         // given
         int movieId = 1;
         Movie movie = new Movie(movieId, "Home Alone", "Christmas movie", 1990, 8.5);
-
         when(movieService.findById(movieId)).thenReturn(movie);
 
         // then
@@ -70,8 +69,7 @@ public class MovieControllerTest {
         // given
         int movieId = 1;
         String message = "Could not find Movie by id - " + movieId;
-
-        when(movieService.findById(movieId)).thenThrow(new MovieNotFoundException(message));
+        doThrow(new MovieNotFoundException(message)).when(movieService).findById(movieId);
 
         // then
         mockMvc.perform(get("/movies/{movieId}", movieId))
@@ -95,7 +93,7 @@ public class MovieControllerTest {
     }
 
     @Test
-    void deletes_movie_by_given_id() throws Exception {
+    void deletes_movie_by_id() throws Exception {
         // given
         int movieId = 1;
         doNothing().when(movieService).deleteById(movieId);
@@ -107,11 +105,10 @@ public class MovieControllerTest {
     }
 
     @Test
-    void throws_exception_when_trying_to_delete_non_existing_movie() throws Exception {
+    void returns_404_response_when_trying_to_delete_non_existing_movie() throws Exception {
         // given
         int movieId = 1;
         String message = "Deletion failed. Could not find movie with id - " + movieId;
-
         doThrow(new MovieNotFoundException(message)).when(movieService).deleteById(movieId);
 
         // then
@@ -121,7 +118,7 @@ public class MovieControllerTest {
     }
 
     @Test
-    void updates_movie() throws Exception {
+    void updates_movie_by_id_with_provided_data() throws Exception {
         // given
         int movieId = 1;
         Movie movie = new Movie(5, "Home Alone", "Christmas movie", 1990, 8.5);
@@ -139,7 +136,7 @@ public class MovieControllerTest {
     }
 
     @Test
-    void throws_exception_when_trying_to_update_non_existing_movie() throws Exception {
+    void returns_404_response_when_trying_to_update_non_existing_movie() throws Exception {
         // given
         int movieId = 1;
         Movie movie = new Movie(5, "Home Alone", "Christmas movie", 1990, 8.5);
@@ -152,6 +149,17 @@ public class MovieControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(jsonMovie))
                 .andExpect(status().isNotFound())
+                .andExpect(content().string(containsString(message)));
+    }
+
+    @Test
+    void returns_500_response_when_trying_to_use_character_instead_of_int_in_url() throws Exception {
+        // given
+        String message = "Request method 'DELETE' is not supported";
+
+        // then
+        mockMvc.perform(delete("/movies"))
+                .andExpect(status().isInternalServerError())
                 .andExpect(content().string(containsString(message)));
     }
 }
