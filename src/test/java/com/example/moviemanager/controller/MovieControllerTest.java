@@ -65,7 +65,7 @@ public class MovieControllerTest {
     }
 
     @Test
-    void throws_exception_when_trying_to_get_non_existing_movie() throws Exception {
+    void returns_response_404_when_trying_to_get_non_existing_movie() throws Exception {
         // given
         int movieId = 1;
         String message = "Could not find Movie by id - " + movieId;

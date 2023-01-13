@@ -1,8 +1,8 @@
 package com.example.moviemanager.service;
 
-import com.example.moviemanager.service.exception.MovieNotFoundException;
 import com.example.moviemanager.repository.MovieRepository;
 import com.example.moviemanager.repository.model.Movie;
+import com.example.moviemanager.service.exception.MovieNotFoundException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -13,6 +13,7 @@ import org.springframework.dao.EmptyResultDataAccessException;
 import java.util.List;
 import java.util.Optional;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.doNothing;
@@ -70,7 +71,7 @@ public class MovieServiceTest {
         Movie actualMovie = movieService.findById(movieId);
 
         // then
-        assertEquals(expectedMovie, actualMovie);
+        assertThat(expectedMovie.equals(actualMovie));
     }
 
     @Test
@@ -103,14 +104,14 @@ public class MovieServiceTest {
     @Test
     void saves_movie() {
         // given
-        Movie expected = new Movie(1, "Home Alone", "Christmas movie", 1990, 8.5);
-        when(movieRepository.save(expected)).thenReturn(expected);
+        Movie expectedMovie = new Movie(1, "Home Alone", "Christmas movie", 1990, 8.5);
+        when(movieRepository.save(expectedMovie)).thenReturn(expectedMovie);
 
         // when
-        Movie actual = movieService.save(expected);
+        Movie actualMovie = movieService.save(expectedMovie);
 
         // then
-        assertEquals(expected, actual);
+        assertThat(expectedMovie.equals(actualMovie));
     }
 
     @Test
@@ -120,15 +121,15 @@ public class MovieServiceTest {
         when(movieRepository.findById(movieId))
                 .thenReturn(Optional.of(new Movie(movieId, "Home Alone 2", "Comedy", 1992, 9.0)));
 
-        Movie expected = new Movie(5, "Home Alone", "Christmas movie", 1990, 8.5);
-        expected.setId(movieId);
-        when(movieRepository.save(expected)).thenReturn(expected);
+        Movie expectedMovie = new Movie(5, "Home Alone", "Christmas movie", 1990, 8.5);
+        expectedMovie.setId(movieId);
+        when(movieRepository.save(expectedMovie)).thenReturn(expectedMovie);
 
         // when
-        Movie actual = movieService.update(movieId, expected);
+        Movie actualMovie = movieService.update(movieId, expectedMovie);
 
         // then
-        assertEquals(expected, actual);
+        assertThat(expectedMovie.equals(actualMovie));
     }
 
     @Test
@@ -136,12 +137,11 @@ public class MovieServiceTest {
         // given
         int movieId = 5;
         Movie movie = new Movie(1, "Home Alone", "Christmas movie", 1990, 8.5);
-        String expectedMessage = "Update failed. Could not find movie by id - " + movieId;
         when(movieRepository.findById(movieId)).thenReturn(Optional.empty());
 
         // then
         assertThatExceptionOfType(MovieNotFoundException.class)
                 .isThrownBy(() -> movieService.update(movieId, movie))
-                .withMessage(expectedMessage);
+                .withMessage("Update failed. Could not find movie by id - " + movieId);
     }
 }

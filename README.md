@@ -17,7 +17,6 @@ Before running this API, I assume that you have successfully installed the follo
 - JDK - required for Maven compilation;
 - Docker - for running 'postgres' image;
 - API client tool (e.g. Postman) or browser - for testing your API;
-- Database management tool (e.g. DBeaver) - for connecting to database.
 
 `Step 1` - in your terminal window start Postgres instance and docker container:
 
@@ -30,37 +29,16 @@ Before running this API, I assume that you have successfully installed the follo
 - PostgreSQL version - 15.1.
 
 Now your database system is ready to accept connections.
-You could connect to DB in any tool that allows you to communicate with it.
 
-`Step 2` - use the following connection details to actually connect to the DB in your database management tool:
+`Step 2` - run API.
 
-- Host: localhost;
-- Port: 5432;
-- User: movieuser;
-- Password: postgres123.
-
-`Step 3` - in your DB tool execute `movie_directory.sql` script.
-You could find it in cloned repo `src/main/resources/`. After executing script 'movie_directory' schema
-and 'movie' table with five columns inside: 'id', 'title', 'description', 'release_year' and 'rating' will be created.
-
-`Step 4` - indicate DB connection details in your application's properties file `src/main/resources/application.properties`:
-- `spring.datasource.url` = jdbc:postgresql://localhost:5432/postgres
-- `spring.datasource.username` = movieuser
-- `spring.datasource.password` = postgres123
-- `spring.datasource.hikari.schema` = movie_directory
-
-*In my project I have used default 'postgres' database.
-You are free to use different connection details but remember to change them in all occurrences.
-
-`Step 5` - run API.
-
-Navigate to root the project and execute command:
+Navigate to root of the project and execute command:
 
     $ mvn spring-boot:run
 
 Now you could open your API client tool or web browser and test application.
 
-*This API is tests covered. You could run them by executing command in root of the project:
+*This REST API is test covered. You could run tests by executing command:
 
     $ mvn clean test
 
@@ -71,3 +49,4 @@ Now you could open your API client tool or web browser and test application.
 - PostgreSQL;
 - Mockito;
 - JUnit;
+- Flyway.
