@@ -22,12 +22,12 @@ public class MovieService {
         return movieRepository.findAll();
     }
 
-    public Movie findById(int id) {
+    public Movie findById(Integer id) {
         Optional<Movie> movie = movieRepository.findById(id);
         return movie.orElseThrow(() -> new MovieNotFoundException("Could not find movie by id - " + id));
     }
 
-    public void deleteById(int id) {
+    public void deleteById(Integer id) {
         try {
             movieRepository.deleteById(id);
         } catch (EmptyResultDataAccessException e) {
@@ -39,7 +39,7 @@ public class MovieService {
         return movieRepository.save(movie);
     }
 
-    public Movie update(int id, Movie movie) {
+    public Movie update(Integer id, Movie movie) {
         Optional<Movie> tempMovie = movieRepository.findById(id);
         if (tempMovie.isEmpty()) {
             throw new MovieNotFoundException("Update failed. Could not find movie by id - " + id);

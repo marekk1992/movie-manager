@@ -1,5 +1,8 @@
 package com.example.moviemanager.controller;
 
+import com.example.moviemanager.controller.dto.MovieRequest;
+import com.example.moviemanager.controller.dto.MovieResponse;
+import com.example.moviemanager.controller.dto.MoviesResponse;
 import com.example.moviemanager.repository.model.Movie;
 import com.example.moviemanager.service.MovieService;
 import jakarta.validation.Valid;
@@ -17,7 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 @RestController
-@RequestMapping("/movies")
+@RequestMapping("/v1/movies")
 public class MovieController {
 
     private final MovieService movieService;
@@ -27,28 +30,32 @@ public class MovieController {
     }
 
     @GetMapping
-    public List<Movie> findAll() {
-        return movieService.findAll();
+    public MoviesResponse findAll() {
+        List<Movie> movies = movieService.findAll();
+        return MoviesResponse.fromEntity(movies);
     }
 
     @GetMapping("/{movieId}")
-    public Movie findById(@PathVariable int movieId) {
-        return movieService.findById(movieId);
+    public MovieResponse findById(@PathVariable Integer movieId) {
+        Movie movie = movieService.findById(movieId);
+        return MovieResponse.fromEntity(movie);
     }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public Movie addMovie(@Valid @RequestBody Movie movie) {
-        return movieService.save(movie);
+    public MovieResponse addMovie(@Valid @RequestBody MovieRequest request) {
+        Movie movie = movieService.save(request.toEntity());
+        return MovieResponse.fromEntity(movie);
     }
 
     @PutMapping("/{movieId}")
-    public Movie updateMovie(@Valid @RequestBody Movie movie, @PathVariable int movieId) {
-        return movieService.update(movieId, movie);
+    public MovieResponse updateMovie(@Valid @RequestBody MovieRequest request, @PathVariable Integer movieId) {
+        Movie movie = movieService.update(movieId, request.toEntity());
+        return MovieResponse.fromEntity(movie);
     }
 
     @DeleteMapping("/{movieId}")
-    public void deleteMovie(@PathVariable int movieId) {
+    public void deleteMovie(@PathVariable Integer movieId) {
         movieService.deleteById(movieId);
     }
 }
