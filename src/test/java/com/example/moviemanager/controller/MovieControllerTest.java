@@ -1,8 +1,11 @@
 package com.example.moviemanager.controller;
 
-import com.example.moviemanager.service.exception.MovieNotFoundException;
+import com.example.moviemanager.controller.dto.MovieRequest;
+import com.example.moviemanager.controller.dto.MovieResponse;
+import com.example.moviemanager.controller.dto.MoviesResponse;
 import com.example.moviemanager.repository.model.Movie;
 import com.example.moviemanager.service.MovieService;
+import com.example.moviemanager.service.exception.MovieNotFoundException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,6 +31,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @WebMvcTest
 public class MovieControllerTest {
 
+    public static final String MOVIES_URL = "/v1/movies";
+    public static final String MOVIES_URL_WITH_ID = MOVIES_URL + "/{movieId}";
+
     @MockBean
     private MovieService movieService;
 
@@ -44,35 +50,37 @@ public class MovieControllerTest {
                 new Movie(1, "Home Alone", "Christmas movie", 1990, 8.5),
                 new Movie(2, "Home Alone 2", "Christmas movie", 1992, 8.9));
         when(movieService.findAll()).thenReturn(movies);
+        String responseBody = objectMapper.writeValueAsString(MoviesResponse.fromEntity(movies));
 
         // then
-        mockMvc.perform(get("/movies"))
+        mockMvc.perform(get(MOVIES_URL))
                 .andExpect(status().isOk())
-                .andExpect(content().string(objectMapper.writeValueAsString(movies)));
+                .andExpect(content().string(responseBody));
     }
 
     @Test
     void returns_movie_by_id() throws Exception {
         // given
-        int movieId = 1;
-        Movie movie = new Movie(movieId, "Home Alone", "Christmas movie", 1990, 8.5);
-        when(movieService.findById(movieId)).thenReturn(movie);
+        Integer movieId = 1;
+        Movie expectedMovie = new Movie(movieId, "Home Alone", "Christmas movie", 1990, 8.5);
+        when(movieService.findById(movieId)).thenReturn(expectedMovie);
+        String responseBody = objectMapper.writeValueAsString(MovieResponse.fromEntity(expectedMovie));
 
         // then
-        mockMvc.perform(get("/movies/{movieId}", movieId))
+        mockMvc.perform(get(MOVIES_URL_WITH_ID, movieId))
                 .andExpect(status().isOk())
-                .andExpect(content().string(objectMapper.writeValueAsString(movie)));
+                .andExpect(content().string(responseBody));
     }
 
     @Test
     void returns_response_404_when_trying_to_get_non_existing_movie() throws Exception {
         // given
-        int movieId = 1;
+        Integer movieId = 1;
         String message = "Could not find Movie by id - " + movieId;
         doThrow(new MovieNotFoundException(message)).when(movieService).findById(movieId);
 
         // then
-        mockMvc.perform(get("/movies/{movieId}", movieId))
+        mockMvc.perform(get(MOVIES_URL_WITH_ID, movieId))
                 .andExpect(status().isNotFound())
                 .andExpect(content().string(containsString(message)));
     }
@@ -80,26 +88,30 @@ public class MovieControllerTest {
     @Test
     void saves_movie() throws Exception {
         // given
-        Movie movie = new Movie(1, "Home Alone", "Christmas movie", 1990, 8.5);
-        String jsonMovie = objectMapper.writeValueAsString(movie);
-        when(movieService.save(movie)).thenReturn(movie);
+        MovieRequest request = new MovieRequest("Home Alone", "Christmas movie", 1990, 8.5);
+        String requestBody = objectMapper.writeValueAsString(request);
+        Movie givenMovie = request.toEntity();
+
+        Movie expectedmovie = new Movie(1, "Home Alone", "Christmas movie", 1990, 8.5);
+        String responseBody = objectMapper.writeValueAsString(MovieResponse.fromEntity(expectedmovie));
+        when(movieService.save(givenMovie)).thenReturn(expectedmovie);
 
         // then
-        mockMvc.perform(post("/movies")
+        mockMvc.perform(post(MOVIES_URL)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(jsonMovie))
+                        .content(requestBody))
                 .andExpect(status().isCreated())
-                .andExpect(content().string(jsonMovie));
+                .andExpect(content().string(responseBody));
     }
 
     @Test
     void deletes_movie_by_id() throws Exception {
         // given
-        int movieId = 1;
+        Integer movieId = 1;
         doNothing().when(movieService).deleteById(movieId);
 
         // then
-        mockMvc.perform(delete("/movies/{movieId}", movieId))
+        mockMvc.perform(delete(MOVIES_URL_WITH_ID, movieId))
                 .andExpect(status().isOk())
                 .andExpect(content().string(blankString()));
     }
@@ -107,12 +119,12 @@ public class MovieControllerTest {
     @Test
     void returns_404_response_when_trying_to_delete_non_existing_movie() throws Exception {
         // given
-        int movieId = 1;
+        Integer movieId = 1;
         String message = "Deletion failed. Could not find movie with id - " + movieId;
         doThrow(new MovieNotFoundException(message)).when(movieService).deleteById(movieId);
 
         // then
-        mockMvc.perform(delete("/movies/{movieId}", movieId))
+        mockMvc.perform(delete(MOVIES_URL_WITH_ID, movieId))
                 .andExpect(status().isNotFound())
                 .andExpect(content().string(containsString(message)));
     }
@@ -120,45 +132,48 @@ public class MovieControllerTest {
     @Test
     void updates_movie_by_id_with_provided_data() throws Exception {
         // given
-        int movieId = 1;
-        Movie movie = new Movie(5, "Home Alone", "Christmas movie", 1990, 8.5);
+        Integer movieId = 1;
+        MovieRequest request = new MovieRequest("Home Alone", "Christmas movie", 1990, 8.5);
+        Movie givenMovie = request.toEntity();
+        String requestBody = objectMapper.writeValueAsString(request);
+
         Movie expectedMovie = new Movie(movieId, "Home Alone", "Christmas movie", 1990, 8.5);
-        String jsonMovie = objectMapper.writeValueAsString(movie);
-        String expectedJsonMovie = objectMapper.writeValueAsString(expectedMovie);
-        when(movieService.update(movieId, movie)).thenReturn(expectedMovie);
+        String responseBody = objectMapper.writeValueAsString(MovieResponse.fromEntity(expectedMovie));
+        when(movieService.update(movieId, givenMovie)).thenReturn(expectedMovie);
 
         // then
-        mockMvc.perform(put("/movies/{movieId}", movieId)
+        mockMvc.perform(put(MOVIES_URL_WITH_ID, movieId)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(jsonMovie))
+                        .content(requestBody))
                 .andExpect(status().isOk())
-                .andExpect(content().string(expectedJsonMovie));
+                .andExpect(content().string(responseBody));
     }
 
     @Test
     void returns_404_response_when_trying_to_update_non_existing_movie() throws Exception {
         // given
-        int movieId = 1;
-        Movie movie = new Movie(5, "Home Alone", "Christmas movie", 1990, 8.5);
-        String jsonMovie = objectMapper.writeValueAsString(movie);
+        Integer movieId = 1;
+        MovieRequest request = new MovieRequest("Home Alone", "Christmas movie", 1990, 8.5);
+        String requestBody = objectMapper.writeValueAsString(request);
+        Movie givenMovie = request.toEntity();
         String message = "Update failed. Could not find movie by id - " + movieId;
-        doThrow(new MovieNotFoundException(message)).when(movieService).update(movieId, movie);
+        doThrow(new MovieNotFoundException(message)).when(movieService).update(movieId, givenMovie);
 
         // then
-        mockMvc.perform(put("/movies/{movieId}", movieId)
+        mockMvc.perform(put(MOVIES_URL_WITH_ID, movieId)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(jsonMovie))
+                        .content(requestBody))
                 .andExpect(status().isNotFound())
                 .andExpect(content().string(containsString(message)));
     }
 
     @Test
-    void returns_500_response_when_trying_to_use_character_instead_of_int_in_url() throws Exception {
+    void returns_500_response_when_trying_to_delete_movie_without_specifying_its_id() throws Exception {
         // given
         String message = "Request method 'DELETE' is not supported";
 
         // then
-        mockMvc.perform(delete("/movies"))
+        mockMvc.perform(delete(MOVIES_URL))
                 .andExpect(status().isInternalServerError())
                 .andExpect(content().string(containsString(message)));
     }
