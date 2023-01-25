@@ -1,0 +1,7 @@
+title, description, releaseYear, rating, errorMessage
+, Description, 1995, 7.5, Title is mandatory.
+This title is longer than 100 characters This title is longer than 100 characters This title is longer than 100 characters, Description, 1995, 7.5, Title can`t be longer than 100 characters.
+Title, This description is longer than 500 characters This description is longer than 500 characters This description is longer than 500 characters This description is longer than 500 characters This description is longer than 500 characters This description is longer than 500 characters This description is longer than 500 characters This description is longer than 500 characters This description is longer than 500 characters This description is longer than 500 characters This description is longer than 500 characters This description is longer than 500 characters, 1995, 7.5, Description can`t be longer than 500 characters.
+Title, Description, 1887, 7.5, First official movie was released in 1888, please check your input.
+Title, Description, 1995, -0.5, Rating can`t be negative.
+Title, Description, 1995, 10.5, Rating can`t be higher than 10.

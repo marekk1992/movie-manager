@@ -13,7 +13,7 @@ public class Movie {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+    private Long id;
 
     @Column(name = "title")
     private String title;
@@ -30,8 +30,15 @@ public class Movie {
     public Movie() {
     }
 
-    public Movie(Integer id, String title, String description, int releaseYear, double rating) {
+    public Movie(Long id, String title, String description, int releaseYear, double rating) {
         this.id = id;
+        this.title = title;
+        this.description = description;
+        this.releaseYear = releaseYear;
+        this.rating = rating;
+    }
+
+    public Movie(String title, String description, int releaseYear, double rating) {
         this.title = title;
         this.description = description;
         this.releaseYear = releaseYear;
@@ -64,14 +71,18 @@ public class Movie {
         }
         Movie movie = (Movie) obj;
 
+        if(movie.id == null) {
+            return false;
+        }
+
         return this.id.equals(movie.id);
     }
 
-    public Integer getId() {
+    public Long getId() {
         return id;
     }
 
-    public void setId(Integer id) {
+    public void setId(Long id) {
         this.id = id;
     }
 

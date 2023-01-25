@@ -1,8 +1,9 @@
 package com.example.moviemanager.controller;
 
-import com.example.moviemanager.controller.dto.MovieRequest;
+import com.example.moviemanager.controller.dto.CreateMovieRequest;
+import com.example.moviemanager.controller.dto.UpdateMovieRequest;
 import com.example.moviemanager.controller.dto.MovieResponse;
-import com.example.moviemanager.controller.dto.MoviesResponse;
+import com.example.moviemanager.controller.dto.MovieCollectionResponse;
 import com.example.moviemanager.repository.model.Movie;
 import com.example.moviemanager.service.MovieService;
 import jakarta.validation.Valid;
@@ -30,32 +31,32 @@ public class MovieController {
     }
 
     @GetMapping
-    public MoviesResponse findAll() {
+    public MovieCollectionResponse findAll() {
         List<Movie> movies = movieService.findAll();
-        return MoviesResponse.fromEntity(movies);
+        return MovieCollectionResponse.fromEntity(movies);
     }
 
     @GetMapping("/{movieId}")
-    public MovieResponse findById(@PathVariable Integer movieId) {
+    public MovieResponse findById(@PathVariable long movieId) {
         Movie movie = movieService.findById(movieId);
         return MovieResponse.fromEntity(movie);
     }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public MovieResponse addMovie(@Valid @RequestBody MovieRequest request) {
+    public MovieResponse addMovie(@Valid @RequestBody CreateMovieRequest request) {
         Movie movie = movieService.save(request.toEntity());
         return MovieResponse.fromEntity(movie);
     }
 
     @PutMapping("/{movieId}")
-    public MovieResponse updateMovie(@Valid @RequestBody MovieRequest request, @PathVariable Integer movieId) {
+    public MovieResponse updateMovie(@Valid @RequestBody UpdateMovieRequest request, @PathVariable long movieId) {
         Movie movie = movieService.update(movieId, request.toEntity());
         return MovieResponse.fromEntity(movie);
     }
 
     @DeleteMapping("/{movieId}")
-    public void deleteMovie(@PathVariable Integer movieId) {
+    public void deleteMovie(@PathVariable long movieId) {
         movieService.deleteById(movieId);
     }
 }
