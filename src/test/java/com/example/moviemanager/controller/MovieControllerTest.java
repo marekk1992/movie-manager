@@ -50,12 +50,12 @@ public class MovieControllerTest {
     private ObjectMapper objectMapper;
 
     @ParameterizedTest
-    @CsvFileSource(resources = "/validation_test.csv", numLinesToSkip = 1)
-    void returns_505_response_when_user_input_validation_is_failed(String title, String description, int releaseYear,
-                                                                   double rating, String message) throws Exception {
+    @CsvFileSource(resources = "/invalid_movie_request_parameters.csv", numLinesToSkip = 1)
+    void returns_505_response_when_user_input_validation_for_creating_movie_is_failed
+            (String title, String description, int releaseYear, double rating, String message) throws Exception {
         // given
-        String requestBody = objectMapper.writeValueAsString(
-                new CreateMovieRequest(title, description, releaseYear, rating));
+        String requestBody = objectMapper
+                .writeValueAsString(new CreateMovieRequest(title, description, releaseYear, rating));
 
         // then
         mockMvc.perform(post(MOVIES_URL)
@@ -65,33 +65,28 @@ public class MovieControllerTest {
                 .andExpect(content().string(containsString(message)));
     }
 
+    @ParameterizedTest
+    @CsvFileSource(resources = "/invalid_movie_request_parameters.csv", numLinesToSkip = 1)
+    void returns_505_response_when_user_input_validation_for_updating_movie_is_failed
+            (String title, String description, int releaseYear, double rating, String message) throws Exception {
+        // given
+        String requestBody = objectMapper
+                .writeValueAsString(new CreateMovieRequest(title, description, releaseYear, rating));
+
+        // then
+        mockMvc.perform(put(MOVIE_BY_ID_URL, 1)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(requestBody))
+                .andExpect(status().isInternalServerError())
+                .andExpect(content().string(containsString(message)));
+    }
+
     @Test
     void returns_list_of_all_movies() throws Exception {
         // given
-        List<Movie> movies = List.of(
+        when(movieService.findAll()).thenReturn(List.of(
                 new Movie(1L, "Home Alone", "Christmas movie", 1990, 8.5),
-                new Movie(2L, "Home Alone 2", "Christmas movie", 1992, 8.9));
-        when(movieService.findAll()).thenReturn(movies);
-        String expectedResponseBody = """
-                   {
-                      "movies": [
-                          {
-                              "id":1,
-                              "title":"Home Alone",
-                              "description":"Christmas movie",
-                              "releaseYear":1990,
-                              "rating":8.5
-                          },
-                          {
-                              "id":2,
-                              "title":"Home Alone 2",
-                              "description":"Christmas movie",
-                              "releaseYear":1992,
-                              "rating":8.9
-                          }
-                      ]
-                   }
-                """;
+                new Movie(2L, "Home Alone 2", "Christmas movie", 1992, 8.9)));
 
         // when
         String actualResponseBody = mockMvc.perform(get(MOVIES_URL))
@@ -99,25 +94,36 @@ public class MovieControllerTest {
                 .andReturn().getResponse().getContentAsString();
 
         // then
-        JSONAssert.assertEquals(expectedResponseBody, actualResponseBody, true);
+        JSONAssert.assertEquals(
+                """
+                           {
+                              "movies": [
+                                  {
+                                      "id":1,
+                                      "title":"Home Alone",
+                                      "description":"Christmas movie",
+                                      "releaseYear":1990,
+                                      "rating":8.5
+                                  },
+                                  {
+                                      "id":2,
+                                      "title":"Home Alone 2",
+                                      "description":"Christmas movie",
+                                      "releaseYear":1992,
+                                      "rating":8.9
+                                  }
+                              ]
+                           }
+                        """,
+                actualResponseBody, true);
     }
 
     @Test
     void returns_movie_by_id() throws Exception {
         // given
         long movieId = 1;
-        Movie expectedMovie =
-                new Movie(movieId, "Home Alone", "Christmas movie", 1990, 8.5);
-        when(movieService.findById(movieId)).thenReturn(expectedMovie);
-        String expectedResponseBody = """
-                   {
-                       "id":1,
-                       "title":"Home Alone",
-                       "description":"Christmas movie",
-                       "releaseYear":1990,
-                       "rating":8.5
-                   }
-                """;
+        when(movieService.findById(movieId))
+                .thenReturn(new Movie(movieId, "Home Alone", "Christmas movie", 1990, 8.5));
 
         // when
         String actualResponseBody = mockMvc.perform(get(MOVIE_BY_ID_URL, movieId))
@@ -125,7 +131,17 @@ public class MovieControllerTest {
                 .andReturn().getResponse().getContentAsString();
 
         // then
-        JSONAssert.assertEquals(expectedResponseBody, actualResponseBody, true);
+        JSONAssert.assertEquals(
+                """
+                           {
+                               "id":1,
+                               "title":"Home Alone",
+                               "description":"Christmas movie",
+                               "releaseYear":1990,
+                               "rating":8.5
+                           }
+                        """,
+                actualResponseBody, true);
     }
 
     @Test
@@ -144,30 +160,32 @@ public class MovieControllerTest {
     @Test
     void creates_movie() throws Exception {
         // given
-        String movieRequest = objectMapper.writeValueAsString(
-                new CreateMovieRequest("Home Alone", "Christmas movie", 1990, 8.5));
-        Movie expectedmovie =
-                new Movie(1L, "Home Alone", "Christmas movie", 1990, 8.5);
-        when(movieService.save(argThat(getMovieArgumentMatcher()))).thenReturn(expectedmovie);
-        String expectedResponseBody = """
-                   {
-                       "id":1,
-                       "title":"Home Alone",
-                       "description":"Christmas movie",
-                       "releaseYear":1990,
-                       "rating":8.5
-                   }
-                """;
+        CreateMovieRequest createMovieRequest =
+                new CreateMovieRequest("Home Alone", "Christmas movie", 1990, 8.5);
+        Movie expectedmovie = new Movie(1L, "Home Alone", "Christmas movie", 1990, 8.5);
+        when(movieService
+                .save(argThat(matchCreateMovieRequestToEntity(createMovieRequest))))
+                .thenReturn(expectedmovie);
 
         // when
         String actualResponseBody = mockMvc.perform(post(MOVIES_URL)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(movieRequest))
+                        .content(objectMapper.writeValueAsString(createMovieRequest)))
                 .andExpect(status().isCreated())
                 .andReturn().getResponse().getContentAsString();
 
         // then
-        JSONAssert.assertEquals(expectedResponseBody, actualResponseBody, true);
+        JSONAssert.assertEquals(
+                """
+                           {
+                               "id":1,
+                               "title":"Home Alone",
+                               "description":"Christmas movie",
+                               "releaseYear":1990,
+                               "rating":8.5
+                           }
+                        """,
+                actualResponseBody, true);
     }
 
     @Test
@@ -199,65 +217,70 @@ public class MovieControllerTest {
     void updates_movie_by_id() throws Exception {
         // given
         long movieId = 1;
-        String request = objectMapper.writeValueAsString(
-                new UpdateMovieRequest("Home Alone", "Christmas movie", 1990, 8.5));
-        Movie expectedMovie =
-                new Movie(movieId, "Home Alone", "Christmas movie", 1990, 8.5);
-        when(movieService.update(eq(1L), argThat(getMovieArgumentMatcher())))
+        UpdateMovieRequest updateMovieRequest =
+                new UpdateMovieRequest("Home Alone", "Christmas movie", 1990, 8.5);
+        Movie expectedMovie = new Movie(movieId, "Home Alone", "Christmas movie", 1990, 8.5);
+        when(movieService
+                .update(eq(1L), argThat(matchUpdateMovieRequestToEntity(updateMovieRequest))))
                 .thenReturn(expectedMovie);
-        String expectedResponseBody = """
-                   {
-                       "id":1,
-                       "title":"Home Alone",
-                       "description":"Christmas movie",
-                       "releaseYear":1990,
-                       "rating":8.5
-                   }
-                """;
 
         // when
         String actualResponseBody = mockMvc.perform(put(MOVIE_BY_ID_URL, movieId)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(request))
+                        .content(objectMapper.writeValueAsString(updateMovieRequest)))
                 .andExpect(status().isOk())
                 .andReturn().getResponse().getContentAsString();
 
         // then
-        JSONAssert.assertEquals(expectedResponseBody, actualResponseBody, true);
+        JSONAssert.assertEquals(
+                """
+                           {
+                               "id":1,
+                               "title":"Home Alone",
+                               "description":"Christmas movie",
+                               "releaseYear":1990,
+                               "rating":8.5
+                           }
+                        """,
+                actualResponseBody, true);
     }
 
     @Test
     void returns_404_response_when_trying_to_update_non_existing_movie() throws Exception {
         // given
         long movieId = 1;
-        String requestBody = objectMapper.writeValueAsString(
-                new UpdateMovieRequest("Home Alone", "Christmas movie", 1990, 8.5));
         String message = "Update failed. Could not find movie by id - " + movieId;
         doThrow(new MovieNotFoundException(message)).when(movieService).update(any(Long.class), any(Movie.class));
 
         // then
         mockMvc.perform(put(MOVIE_BY_ID_URL, movieId)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(requestBody))
+                        .content(objectMapper.writeValueAsString(
+                                new UpdateMovieRequest("Home Alone", "Christmas movie",
+                                        1990, 8.5))))
                 .andExpect(status().isNotFound())
                 .andExpect(content().string(containsString(message)));
     }
 
     @Test
     void returns_500_response_when_trying_to_delete_movie_without_specifying_its_id() throws Exception {
-        // given
-        String message = "Request method 'DELETE' is not supported";
-
-        // then
+        // expect
         mockMvc.perform(delete(MOVIES_URL))
                 .andExpect(status().isInternalServerError())
-                .andExpect(content().string(containsString(message)));
+                .andExpect(content().string(containsString("Request method 'DELETE' is not supported")));
     }
 
-    private ArgumentMatcher<Movie> getMovieArgumentMatcher() {
-        return movie -> movie.getTitle().equals("Home Alone") &&
-                        movie.getDescription().equals("Christmas movie") &&
-                        movie.getReleaseYear() == 1990 &&
-                        movie.getRating() == 8.5;
+    private ArgumentMatcher<Movie> matchCreateMovieRequestToEntity(CreateMovieRequest createMovieRequest) {
+        return movie -> movie.getTitle().equals(createMovieRequest.title()) &&
+                        movie.getDescription().equals(createMovieRequest.description()) &&
+                        movie.getReleaseYear() == createMovieRequest.releaseYear() &&
+                        movie.getRating() == createMovieRequest.rating();
+    }
+
+    private ArgumentMatcher<Movie> matchUpdateMovieRequestToEntity(UpdateMovieRequest updateMovieRequest) {
+        return movie -> movie.getTitle().equals(updateMovieRequest.title()) &&
+                        movie.getDescription().equals(updateMovieRequest.description()) &&
+                        movie.getReleaseYear() == updateMovieRequest.releaseYear() &&
+                        movie.getRating() == updateMovieRequest.rating();
     }
 }

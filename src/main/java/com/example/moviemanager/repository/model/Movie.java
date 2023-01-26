@@ -71,10 +71,6 @@ public class Movie {
         }
         Movie movie = (Movie) obj;
 
-        if(movie.id == null) {
-            return false;
-        }
-
         return this.id.equals(movie.id);
     }
 
