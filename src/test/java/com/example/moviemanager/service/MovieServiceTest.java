@@ -36,8 +36,8 @@ public class MovieServiceTest {
     void returns_list_of_all_movies() {
         // given
         List<Movie> expectedMovies = List.of(
-                new Movie(1, "Home Alone", "Christmas movie", 1990, 8.5),
-                new Movie(2, "Home Alone 2", "Christmas movie", 1992, 8.9));
+                new Movie(1L, "Home Alone", "Christmas movie", 1990, 8.5),
+                new Movie(2L, "Home Alone 2", "Christmas movie", 1992, 8.9));
         when(movieRepository.findAll()).thenReturn(expectedMovies);
 
         // when
@@ -50,21 +50,21 @@ public class MovieServiceTest {
     @Test
     void throws_exception_when_trying_to_find_non_existing_movie() {
         // given
-        int movieId = 2;
-        String expectedMessage = "Could not find movie by id - " + movieId;
+        long movieId = 2;
         when(movieRepository.findById(movieId)).thenReturn(Optional.empty());
 
         // then
         assertThatExceptionOfType(MovieNotFoundException.class)
                 .isThrownBy(() -> movieService.findById(movieId))
-                .withMessage(expectedMessage);
+                .withMessage("Could not find movie by id - " + movieId);
     }
 
     @Test
     void finds_movie_by_id() {
         // given
-        int movieId = 1;
-        Movie expectedMovie = new Movie(movieId, "Home Alone", "Christmas movie", 1990, 8.5);
+        long movieId = 1;
+        Movie expectedMovie =
+                new Movie(movieId, "Home Alone", "Christmas movie", 1990, 8.5);
         when(movieRepository.findById(movieId)).thenReturn(Optional.of(expectedMovie));
 
         // when
@@ -77,20 +77,19 @@ public class MovieServiceTest {
     @Test
     void throws_exception_when_trying_to_delete_non_existing_movie() {
         // given
-        int movieId = 2;
-        String expectedMessage = "Deletion failed. Could not find movie with id - " + movieId;
+        long movieId = 2;
         doThrow(EmptyResultDataAccessException.class).when(movieRepository).deleteById(movieId);
 
         // then
         assertThatExceptionOfType(MovieNotFoundException.class)
                 .isThrownBy(() -> movieService.deleteById(movieId))
-                .withMessage(expectedMessage);
+                .withMessage("Deletion failed. Could not find movie with id - " + movieId);
     }
 
     @Test
     void deletes_movie_by_id() {
         // given
-        int movieId = 1;
+        long movieId = 1;
         doNothing().when(movieRepository).deleteById(movieId);
 
         // when
@@ -104,7 +103,8 @@ public class MovieServiceTest {
     @Test
     void saves_movie() {
         // given
-        Movie expectedMovie = new Movie(1, "Home Alone", "Christmas movie", 1990, 8.5);
+        Movie expectedMovie =
+                new Movie(1L, "Home Alone", "Christmas movie", 1990, 8.5);
         when(movieRepository.save(expectedMovie)).thenReturn(expectedMovie);
 
         // when
@@ -117,11 +117,11 @@ public class MovieServiceTest {
     @Test
     void updates_movie_by_id_with_provided_data() {
         // given
-        int movieId = 1;
-        when(movieRepository.findById(movieId))
-                .thenReturn(Optional.of(new Movie(movieId, "Home Alone 2", "Comedy", 1992, 9.0)));
-
-        Movie expectedMovie = new Movie(5, "Home Alone", "Christmas movie", 1990, 8.5);
+        long movieId = 1;
+        when(movieRepository.findById(movieId)).thenReturn(
+                Optional.of(new Movie(movieId, "Home Alone 2", "Comedy", 1992, 9.0)));
+        Movie expectedMovie =
+                new Movie(5L, "Home Alone", "Christmas movie", 1990, 8.5);
         expectedMovie.setId(movieId);
         when(movieRepository.save(expectedMovie)).thenReturn(expectedMovie);
 
@@ -135,8 +135,8 @@ public class MovieServiceTest {
     @Test
     void throws_exception_when_trying_to_update_non_existing_movie() {
         // given
-        int movieId = 5;
-        Movie movie = new Movie(1, "Home Alone", "Christmas movie", 1990, 8.5);
+        long movieId = 5;
+        Movie movie = new Movie(1L, "Home Alone", "Christmas movie", 1990, 8.5);
         when(movieRepository.findById(movieId)).thenReturn(Optional.empty());
 
         // then

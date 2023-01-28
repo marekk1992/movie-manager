@@ -6,10 +6,6 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
-import jakarta.validation.constraints.Max;
-import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Size;
 
 @Entity
 @Table(name = "movie")
@@ -17,31 +13,32 @@ public class Movie {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+    private Long id;
 
     @Column(name = "title")
-    @NotBlank(message = "Title is mandatory.")
-    @Size(max = 100, message = "Title can`t be longer than 100 characters.")
     private String title;
 
     @Column(name = "description")
-    @Size(max = 500, message = "Description can`t be longer than 500 characters.")
     private String description;
 
     @Column(name = "release_year")
-    @Min(value = 1888, message = "First official movie was released in 1888, please check your input.")
     private int releaseYear;
 
     @Column(name = "rating")
-    @Min(value = 0, message = "Rating can`t be negative.")
-    @Max(value = 10, message = "Rating can`t be higher than 10.")
     private double rating;
 
     public Movie() {
     }
 
-    public Movie(int id, String title, String description, int releaseYear, double rating) {
+    public Movie(Long id, String title, String description, int releaseYear, double rating) {
         this.id = id;
+        this.title = title;
+        this.description = description;
+        this.releaseYear = releaseYear;
+        this.rating = rating;
+    }
+
+    public Movie(String title, String description, int releaseYear, double rating) {
         this.title = title;
         this.description = description;
         this.releaseYear = releaseYear;
@@ -77,11 +74,11 @@ public class Movie {
         return this.id.equals(movie.id);
     }
 
-    public int getId() {
+    public Long getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(Long id) {
         this.id = id;
     }
 
