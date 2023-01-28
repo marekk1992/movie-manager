@@ -51,8 +51,9 @@ public class MovieControllerTest {
 
     @ParameterizedTest
     @CsvFileSource(resources = "/invalid_movie_request_parameters.csv", numLinesToSkip = 1)
-    void returns_505_response_when_user_input_validation_for_creating_movie_is_failed
-            (String title, String description, int releaseYear, double rating, String message) throws Exception {
+    void returns_505_response_when_user_input_validation_for_creating_movie_is_failed(
+            String title, String description, int releaseYear, double rating, String message
+    ) throws Exception {
         // given
         String requestBody = objectMapper
                 .writeValueAsString(new CreateMovieRequest(title, description, releaseYear, rating));
@@ -67,8 +68,9 @@ public class MovieControllerTest {
 
     @ParameterizedTest
     @CsvFileSource(resources = "/invalid_movie_request_parameters.csv", numLinesToSkip = 1)
-    void returns_505_response_when_user_input_validation_for_updating_movie_is_failed
-            (String title, String description, int releaseYear, double rating, String message) throws Exception {
+    void returns_505_response_when_user_input_validation_for_updating_movie_is_failed(
+            String title, String description, int releaseYear, double rating, String message
+    ) throws Exception {
         // given
         String requestBody = objectMapper
                 .writeValueAsString(new CreateMovieRequest(title, description, releaseYear, rating));
@@ -163,9 +165,7 @@ public class MovieControllerTest {
         CreateMovieRequest createMovieRequest =
                 new CreateMovieRequest("Home Alone", "Christmas movie", 1990, 8.5);
         Movie expectedmovie = new Movie(1L, "Home Alone", "Christmas movie", 1990, 8.5);
-        when(movieService
-                .save(argThat(matchCreateMovieRequestToEntity(createMovieRequest))))
-                .thenReturn(expectedmovie);
+        when(movieService.save(argThat(matchCreateMovieRequestToEntity(createMovieRequest)))).thenReturn(expectedmovie);
 
         // when
         String actualResponseBody = mockMvc.perform(post(MOVIES_URL)
@@ -220,8 +220,7 @@ public class MovieControllerTest {
         UpdateMovieRequest updateMovieRequest =
                 new UpdateMovieRequest("Home Alone", "Christmas movie", 1990, 8.5);
         Movie expectedMovie = new Movie(movieId, "Home Alone", "Christmas movie", 1990, 8.5);
-        when(movieService
-                .update(eq(1L), argThat(matchUpdateMovieRequestToEntity(updateMovieRequest))))
+        when(movieService.update(eq(1L), argThat(matchUpdateMovieRequestToEntity(updateMovieRequest))))
                 .thenReturn(expectedMovie);
 
         // when
@@ -256,8 +255,12 @@ public class MovieControllerTest {
         mockMvc.perform(put(MOVIE_BY_ID_URL, movieId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(
-                                new UpdateMovieRequest("Home Alone", "Christmas movie",
-                                        1990, 8.5))))
+                                new UpdateMovieRequest("Home Alone",
+                                        "Christmas movie",
+                                        1990,
+                                        8.5
+                                )
+                        )))
                 .andExpect(status().isNotFound())
                 .andExpect(content().string(containsString(message)));
     }
