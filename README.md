@@ -49,4 +49,5 @@ Now you could open your API client tool or web browser and test application.
 - PostgreSQL;
 - Mockito;
 - JUnit;
-- Flyway.
+- Flyway;
+- Testcontainers.

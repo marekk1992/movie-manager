@@ -33,7 +33,7 @@ public class MovieServiceTest {
     private MovieService movieService;
 
     @Test
-    void returns_list_of_all_movies() {
+    void returns_collection_of_movies() {
         // given
         List<Movie> expectedMovies = List.of(
                 new Movie(1L, "Home Alone", "Christmas movie", 1990, 8.5),
@@ -45,18 +45,6 @@ public class MovieServiceTest {
 
         // then
         assertEquals(expectedMovies, actualMovies);
-    }
-
-    @Test
-    void throws_exception_when_trying_to_find_non_existing_movie() {
-        // given
-        long movieId = 2;
-        when(movieRepository.findById(movieId)).thenReturn(Optional.empty());
-
-        // then
-        assertThatExceptionOfType(MovieNotFoundException.class)
-                .isThrownBy(() -> movieService.findById(movieId))
-                .withMessage("Could not find movie by id - " + movieId);
     }
 
     @Test
@@ -75,15 +63,15 @@ public class MovieServiceTest {
     }
 
     @Test
-    void throws_exception_when_trying_to_delete_non_existing_movie() {
+    void throws_exception_when_trying_to_find_non_existing_movie() {
         // given
         long movieId = 2;
-        doThrow(EmptyResultDataAccessException.class).when(movieRepository).deleteById(movieId);
+        when(movieRepository.findById(movieId)).thenReturn(Optional.empty());
 
         // then
         assertThatExceptionOfType(MovieNotFoundException.class)
-                .isThrownBy(() -> movieService.deleteById(movieId))
-                .withMessage("Deletion failed. Could not find movie with id - " + movieId);
+                .isThrownBy(() -> movieService.findById(movieId))
+                .withMessage("Could not find movie by id - " + movieId);
     }
 
     @Test
@@ -98,6 +86,18 @@ public class MovieServiceTest {
         // then
         verify(movieRepository, times(1)).deleteById(movieId);
         verifyNoMoreInteractions(movieRepository);
+    }
+
+    @Test
+    void throws_exception_when_trying_to_delete_non_existing_movie() {
+        // given
+        long movieId = 2;
+        doThrow(EmptyResultDataAccessException.class).when(movieRepository).deleteById(movieId);
+
+        // then
+        assertThatExceptionOfType(MovieNotFoundException.class)
+                .isThrownBy(() -> movieService.deleteById(movieId))
+                .withMessage("Deletion failed. Could not find movie with id - " + movieId);
     }
 
     @Test

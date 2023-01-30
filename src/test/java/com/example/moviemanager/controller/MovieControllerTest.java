@@ -49,42 +49,8 @@ public class MovieControllerTest {
     @Autowired
     private ObjectMapper objectMapper;
 
-    @ParameterizedTest
-    @CsvFileSource(resources = "/invalid_movie_request_parameters.csv", numLinesToSkip = 1)
-    void returns_505_response_when_user_input_validation_for_creating_movie_is_failed(
-            String title, String description, int releaseYear, double rating, String message
-    ) throws Exception {
-        // given
-        String requestBody = objectMapper
-                .writeValueAsString(new CreateMovieRequest(title, description, releaseYear, rating));
-
-        // then
-        mockMvc.perform(post(MOVIES_URL)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(requestBody))
-                .andExpect(status().isInternalServerError())
-                .andExpect(content().string(containsString(message)));
-    }
-
-    @ParameterizedTest
-    @CsvFileSource(resources = "/invalid_movie_request_parameters.csv", numLinesToSkip = 1)
-    void returns_505_response_when_user_input_validation_for_updating_movie_is_failed(
-            String title, String description, int releaseYear, double rating, String message
-    ) throws Exception {
-        // given
-        String requestBody = objectMapper
-                .writeValueAsString(new CreateMovieRequest(title, description, releaseYear, rating));
-
-        // then
-        mockMvc.perform(put(MOVIE_BY_ID_URL, 1)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(requestBody))
-                .andExpect(status().isInternalServerError())
-                .andExpect(content().string(containsString(message)));
-    }
-
     @Test
-    void returns_list_of_all_movies() throws Exception {
+    void returns_collection_of_movies() throws Exception {
         // given
         when(movieService.findAll()).thenReturn(List.of(
                 new Movie(1L, "Home Alone", "Christmas movie", 1990, 8.5),
@@ -188,28 +154,20 @@ public class MovieControllerTest {
                 actualResponseBody, true);
     }
 
-    @Test
-    void deletes_movie_by_id() throws Exception {
+    @ParameterizedTest
+    @CsvFileSource(resources = "/invalid_movie_request_parameters.csv", numLinesToSkip = 1)
+    void returns_505_response_when_user_input_validation_for_creating_movie_is_failed(
+            String title, String description, int releaseYear, double rating, String message
+    ) throws Exception {
         // given
-        long movieId = 1;
-        doNothing().when(movieService).deleteById(movieId);
+        String requestBody = objectMapper
+                .writeValueAsString(new CreateMovieRequest(title, description, releaseYear, rating));
 
         // then
-        mockMvc.perform(delete(MOVIE_BY_ID_URL, movieId))
-                .andExpect(status().isOk())
-                .andExpect(content().string(blankString()));
-    }
-
-    @Test
-    void returns_404_response_when_trying_to_delete_non_existing_movie() throws Exception {
-        // given
-        long movieId = 1;
-        String message = "Deletion failed. Could not find movie with id - " + movieId;
-        doThrow(new MovieNotFoundException(message)).when(movieService).deleteById(movieId);
-
-        // then
-        mockMvc.perform(delete(MOVIE_BY_ID_URL, movieId))
-                .andExpect(status().isNotFound())
+        mockMvc.perform(post(MOVIES_URL)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(requestBody))
+                .andExpect(status().isInternalServerError())
                 .andExpect(content().string(containsString(message)));
     }
 
@@ -244,6 +202,23 @@ public class MovieControllerTest {
                 actualResponseBody, true);
     }
 
+    @ParameterizedTest
+    @CsvFileSource(resources = "/invalid_movie_request_parameters.csv", numLinesToSkip = 1)
+    void returns_505_response_when_user_input_validation_for_updating_movie_is_failed(
+            String title, String description, int releaseYear, double rating, String message
+    ) throws Exception {
+        // given
+        String requestBody = objectMapper
+                .writeValueAsString(new UpdateMovieRequest(title, description, releaseYear, rating));
+
+        // then
+        mockMvc.perform(put(MOVIE_BY_ID_URL, 1)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(requestBody))
+                .andExpect(status().isInternalServerError())
+                .andExpect(content().string(containsString(message)));
+    }
+
     @Test
     void returns_404_response_when_trying_to_update_non_existing_movie() throws Exception {
         // given
@@ -261,6 +236,31 @@ public class MovieControllerTest {
                                         8.5
                                 )
                         )))
+                .andExpect(status().isNotFound())
+                .andExpect(content().string(containsString(message)));
+    }
+
+    @Test
+    void deletes_movie_by_id() throws Exception {
+        // given
+        long movieId = 1;
+        doNothing().when(movieService).deleteById(movieId);
+
+        // then
+        mockMvc.perform(delete(MOVIE_BY_ID_URL, movieId))
+                .andExpect(status().isOk())
+                .andExpect(content().string(blankString()));
+    }
+
+    @Test
+    void returns_404_response_when_trying_to_delete_non_existing_movie() throws Exception {
+        // given
+        long movieId = 1;
+        String message = "Deletion failed. Could not find movie with id - " + movieId;
+        doThrow(new MovieNotFoundException(message)).when(movieService).deleteById(movieId);
+
+        // then
+        mockMvc.perform(delete(MOVIE_BY_ID_URL, movieId))
                 .andExpect(status().isNotFound())
                 .andExpect(content().string(containsString(message)));
     }
