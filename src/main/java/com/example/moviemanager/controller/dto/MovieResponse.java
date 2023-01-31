@@ -2,7 +2,9 @@ package com.example.moviemanager.controller.dto;
 
 import com.example.moviemanager.repository.model.Movie;
 
-public record MovieResponse(long id, String title, String description, int releaseYear, double rating) {
+import java.util.UUID;
+
+public record MovieResponse(UUID id, String title, String description, int releaseYear, double rating) {
 
     public static MovieResponse fromEntity(Movie movie) {
         return new MovieResponse(

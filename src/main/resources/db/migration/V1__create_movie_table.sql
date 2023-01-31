@@ -1,5 +1,5 @@
 create table movie (
-    id bigserial primary key,
+    id uuid primary key,
     title varchar(100),
     description varchar(500),
     release_year int,

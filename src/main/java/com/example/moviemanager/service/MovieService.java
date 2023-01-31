@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @Service
 public class MovieService {
@@ -22,12 +23,12 @@ public class MovieService {
         return movieRepository.findAll();
     }
 
-    public Movie findById(long id) {
+    public Movie findById(UUID id) {
         Optional<Movie> movie = movieRepository.findById(id);
         return movie.orElseThrow(() -> new MovieNotFoundException("Could not find movie by id - " + id));
     }
 
-    public void deleteById(long id) {
+    public void deleteById(UUID id) {
         try {
             movieRepository.deleteById(id);
         } catch (EmptyResultDataAccessException e) {
@@ -39,7 +40,7 @@ public class MovieService {
         return movieRepository.save(movie);
     }
 
-    public Movie update(long id, Movie movie) {
+    public Movie update(UUID id, Movie movie) {
         Optional<Movie> tempMovie = movieRepository.findById(id);
         if (tempMovie.isEmpty()) {
             throw new MovieNotFoundException("Update failed. Could not find movie by id - " + id);
