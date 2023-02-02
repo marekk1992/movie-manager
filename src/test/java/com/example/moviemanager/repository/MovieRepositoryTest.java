@@ -51,8 +51,8 @@ public class MovieRepositoryTest {
         Optional<Movie> actualMovie = movieRepository.findById(ID_1);
 
         // then
-        assertThat(ID_1)
-                .isEqualTo(actualMovie.get().getId());
+        assertThat(actualMovie.get().getId())
+                .isEqualTo(ID_1);
     }
 
     @Test
@@ -63,8 +63,8 @@ public class MovieRepositoryTest {
         );
 
         // then
-        assertThat(ID_1)
-                .isEqualTo(savedMovie.getId());
+        assertThat(savedMovie.getId())
+                .isEqualTo(ID_1);
     }
 
     @Test

@@ -62,8 +62,8 @@ public class MovieServiceTest {
         Movie actualMovie = movieService.findById(ID_1);
 
         // then
-        assertThat(expectedMovie)
-                .isEqualTo(actualMovie);
+        assertThat(actualMovie)
+                .isEqualTo(expectedMovie);
     }
 
     @Test
@@ -121,8 +121,7 @@ public class MovieServiceTest {
         // given
         when(movieRepository.findById(ID_1))
                 .thenReturn(Optional.of(new Movie(ID_1, "Home Alone 2", "Comedy", 1992, 9.0)));
-        Movie expectedMovie = new Movie("Home Alone", "Christmas movie", 1990, 8.5);
-        expectedMovie.setId(ID_1);
+        Movie expectedMovie = new Movie(ID_1, "Home Alone", "Christmas movie", 1990, 8.5);
         when(movieRepository.save(expectedMovie)).thenReturn(expectedMovie);
 
         // when
