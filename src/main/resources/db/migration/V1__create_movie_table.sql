@@ -1,7 +1,7 @@
-CREATE TABLE movie (
-    id bigserial PRIMARY KEY,
-    title VARCHAR(100),
-    description VARCHAR(500),
-    release_year INT,
-    rating FLOAT(2)
+create table movie (
+    id bigserial primary key,
+    title varchar(100),
+    description varchar(500),
+    release_year int,
+    rating float(2)
 );
