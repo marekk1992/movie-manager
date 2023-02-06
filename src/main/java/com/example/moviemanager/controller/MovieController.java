@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/v1/movies")
@@ -37,7 +38,7 @@ public class MovieController {
     }
 
     @GetMapping("/{movieId}")
-    public MovieResponse findById(@PathVariable long movieId) {
+    public MovieResponse findById(@PathVariable UUID movieId) {
         Movie movie = movieService.findById(movieId);
         return MovieResponse.fromEntity(movie);
     }
@@ -50,13 +51,13 @@ public class MovieController {
     }
 
     @PutMapping("/{movieId}")
-    public MovieResponse updateMovie(@Valid @RequestBody UpdateMovieRequest request, @PathVariable long movieId) {
+    public MovieResponse updateMovie(@Valid @RequestBody UpdateMovieRequest request, @PathVariable UUID movieId) {
         Movie movie = movieService.update(movieId, request.toEntity());
         return MovieResponse.fromEntity(movie);
     }
 
     @DeleteMapping("/{movieId}")
-    public void deleteMovie(@PathVariable long movieId) {
+    public void deleteMovie(@PathVariable UUID movieId) {
         movieService.deleteById(movieId);
     }
 }

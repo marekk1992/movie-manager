@@ -2,18 +2,17 @@ package com.example.moviemanager.repository.model;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+
+import java.util.UUID;
 
 @Entity
 @Table(name = "movie")
 public class Movie {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private UUID id;
 
     @Column(name = "title")
     private String title;
@@ -30,15 +29,16 @@ public class Movie {
     public Movie() {
     }
 
-    public Movie(Long id, String title, String description, int releaseYear, double rating) {
-        this.id = id;
+    public Movie(String title, String description, int releaseYear, double rating) {
+        id = UUID.randomUUID();
         this.title = title;
         this.description = description;
         this.releaseYear = releaseYear;
         this.rating = rating;
     }
 
-    public Movie(String title, String description, int releaseYear, double rating) {
+    public Movie(UUID id, String title, String description, int releaseYear, double rating) {
+        this.id = id;
         this.title = title;
         this.description = description;
         this.releaseYear = releaseYear;
@@ -74,11 +74,11 @@ public class Movie {
         return this.id.equals(movie.id);
     }
 
-    public Long getId() {
+    public UUID getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(UUID id) {
         this.id = id;
     }
 
