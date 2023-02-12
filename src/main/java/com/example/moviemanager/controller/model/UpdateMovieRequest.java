@@ -1,12 +1,12 @@
-package com.example.moviemanager.controller.dto;
+package com.example.moviemanager.controller.model;
 
-import com.example.moviemanager.repository.model.Movie;
+import com.example.moviemanager.service.model.UpdateMovieInfo;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 
-public record CreateMovieRequest(
+public record UpdateMovieRequest(
         @NotBlank(message = "Title is mandatory.")
         @Size(max = 100, message = "Title can`t be longer than 100 characters.")
         String title,
@@ -22,7 +22,7 @@ public record CreateMovieRequest(
         double rating
 ) {
 
-    public Movie toEntity() {
-        return new Movie(title, description, releaseYear, rating);
+    public UpdateMovieInfo toUpdateMovieDetails() {
+        return new UpdateMovieInfo(title, description, releaseYear, rating);
     }
 }

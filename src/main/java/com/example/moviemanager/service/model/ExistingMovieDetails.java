@@ -1,13 +1,13 @@
-package com.example.moviemanager.controller.dto;
+package com.example.moviemanager.service.model;
 
 import com.example.moviemanager.repository.model.Movie;
 
 import java.util.UUID;
 
-public record MovieResponse(UUID id, String title, String description, int releaseYear, double rating) {
+public record ExistingMovieDetails(UUID id, String title, String description, int releaseYear, double rating) {
 
-    public static MovieResponse fromEntity(Movie movie) {
-        return new MovieResponse(
+    public static ExistingMovieDetails fromEntity(Movie movie) {
+        return new ExistingMovieDetails(
                 movie.getId(),
                 movie.getTitle(),
                 movie.getDescription(),
