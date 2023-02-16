@@ -8,7 +8,7 @@ This API uses PostgreSQL database for storing movies data and provides ability t
 - get all movies in library;
 - get details about movie by it`s id.
 
-You could use this API to create your own watchlist of movies and TV-shows.
+API integrates with _TMDB - The Movie Database_ for retrieving movies and tv-shows data.
 
 ## 2. How to run this API
 Before running this API, I assume that you have successfully installed the following tools on your computer:
@@ -30,7 +30,13 @@ Before running this API, I assume that you have successfully installed the follo
 
 Now your database system is ready to accept connections.
 
-`Step 2` - run API.
+`Step 2` - indicate your own API KEY for integration with TMDB:
+
+Generate your own API KEY on https://www.themoviedb.org/ website and insert it into application's properties file `src/main/resources/application.yml`:
+    
+`tmdb:apiKey:` your key
+
+`Step 3` - run API.
 
 Navigate to root of the project and execute command:
 

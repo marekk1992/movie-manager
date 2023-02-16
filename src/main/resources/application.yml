@@ -7,3 +7,7 @@ spring:
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
+
+tmdb:
+  baseUrl: https://api.themoviedb.org
+  apiKey: 22658692d7dc32845ab997b8db5b87f7

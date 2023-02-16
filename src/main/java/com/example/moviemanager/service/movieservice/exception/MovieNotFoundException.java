@@ -1,4 +1,4 @@
-package com.example.moviemanager.service.exception;
+package com.example.moviemanager.service.movieservice.exception;
 
 public class MovieNotFoundException extends RuntimeException {
 
