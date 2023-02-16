@@ -1,6 +1,6 @@
 package com.example.moviemanager.controller.model;
 
-import com.example.moviemanager.repository.model.Movie;
+import com.example.moviemanager.service.model.UpdateMovieInfo;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
@@ -22,7 +22,7 @@ public record UpdateMovieRequest(
         double rating
 ) {
 
-    public Movie toEntity() {
-        return new Movie(title.toUpperCase(), description, releaseYear, rating);
+    public UpdateMovieInfo toUpdateMovieDetails() {
+        return new UpdateMovieInfo(title, description, releaseYear, rating);
     }
 }

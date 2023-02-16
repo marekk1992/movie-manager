@@ -5,6 +5,7 @@ import com.example.moviemanager.controller.model.MovieCollectionResponse;
 import com.example.moviemanager.controller.model.MovieResponse;
 import com.example.moviemanager.controller.model.UpdateMovieRequest;
 import com.example.moviemanager.service.MovieService;
+import com.example.moviemanager.service.model.ExistingMovieDetails;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -17,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -31,23 +33,27 @@ public class MovieController {
 
     @GetMapping
     public MovieCollectionResponse findAll() {
-        return MovieCollectionResponse.fromEntity(movieService.findAll());
+        List<ExistingMovieDetails> existingMoviesDetails = movieService.findAll();
+        return MovieCollectionResponse.fromExistingMovieDetails(existingMoviesDetails);
     }
 
     @GetMapping("/{movieId}")
     public MovieResponse findById(@PathVariable UUID movieId) {
-        return MovieResponse.fromEntity(movieService.findById(movieId));
+        ExistingMovieDetails existingMovieDetails = movieService.findById(movieId);
+        return MovieResponse.fromExistingMovieDetails(existingMovieDetails);
     }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public MovieResponse addMovie(@Valid @RequestBody CreateMovieRequest request) {
-        return MovieResponse.fromEntity(movieService.save(request.toFindMovieInfo()));
+        ExistingMovieDetails existingMovieDetails = movieService.save(request.toCreateMovieInfo());
+        return MovieResponse.fromExistingMovieDetails(existingMovieDetails);
     }
 
     @PutMapping("/{movieId}")
     public MovieResponse updateMovie(@Valid @RequestBody UpdateMovieRequest request, @PathVariable UUID movieId) {
-        return MovieResponse.fromEntity(movieService.update(movieId, request.toEntity()));
+        ExistingMovieDetails existingMovieDetails = movieService.update(movieId, request.toUpdateMovieDetails());
+        return MovieResponse.fromExistingMovieDetails(existingMovieDetails);
     }
 
     @DeleteMapping("/{movieId}")
