@@ -1,9 +1,9 @@
-package com.example.moviemanager.service.model.api;
+package com.example.moviemanager.service.tmdbmovieservice.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import java.util.List;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public record ApiResponse(List<MovieDetailsFromApi> results) {
+public record MovieDetailsResponse(List<MovieDetails> results) {
 }

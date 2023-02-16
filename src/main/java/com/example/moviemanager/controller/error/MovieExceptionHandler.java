@@ -1,7 +1,7 @@
 package com.example.moviemanager.controller.error;
 
 import com.example.moviemanager.controller.error.model.ApiError;
-import com.example.moviemanager.service.exception.MovieNotFoundException;
+import com.example.moviemanager.service.movieservice.exception.MovieNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
