@@ -1,4 +1,4 @@
-package com.example.moviemanager.service.tmdbmovieservice.exception;
+package com.example.moviemanager.service.exception;
 
 public class UniqueMovieDetailsNotFoundException extends RuntimeException {
 

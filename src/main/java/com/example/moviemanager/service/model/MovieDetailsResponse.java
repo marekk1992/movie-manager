@@ -1,4 +1,4 @@
-package com.example.moviemanager.service.tmdbmovieservice.model;
+package com.example.moviemanager.service.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 

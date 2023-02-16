@@ -2,10 +2,9 @@ package com.example.moviemanager.service;
 
 import com.example.moviemanager.repository.MovieRepository;
 import com.example.moviemanager.repository.model.Movie;
-import com.example.moviemanager.service.tmdbmovieservice.TmdbMovieService;
-import com.example.moviemanager.service.tmdbmovieservice.model.FindMovieInfo;
-import com.example.moviemanager.service.tmdbmovieservice.model.MovieDetails;
-import com.example.moviemanager.service.movieservice.exception.MovieNotFoundException;
+import com.example.moviemanager.service.exception.MovieNotFoundException;
+import com.example.moviemanager.service.model.FindMovieInfo;
+import com.example.moviemanager.service.model.MovieDetails;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
 
@@ -42,7 +41,15 @@ public class MovieService {
     }
 
     public Movie save(FindMovieInfo findMovieInfo) {
-        return movieRepository.save(tmdbMovieService.getMovie(findMovieInfo));
+        MovieDetails movieDetails = tmdbMovieService.getDetails(findMovieInfo);
+        Movie createdMovie = new Movie(
+                findMovieInfo.title(),
+                movieDetails.description(),
+                findMovieInfo.releaseYear(),
+                movieDetails.rating()
+        );
+
+        return movieRepository.save(createdMovie);
     }
 
     public Movie update(UUID id, Movie movie) {
@@ -53,14 +60,5 @@ public class MovieService {
         movie.setId(id);
 
         return movieRepository.save(movie);
-    }
-
-    private Movie buildMovie(FindMovieInfo findMovieInfo, MovieDetails movieDetails) {
-        return new Movie(
-                findMovieInfo.title(),
-                movieDetails.overview(),
-                findMovieInfo.releaseYear(),
-                movieDetails.vote_average()
-        );
     }
 }

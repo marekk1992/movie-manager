@@ -1,19 +1,19 @@
-package com.example.moviemanager.service.tmdbmovieservice.configuration;
+package com.example.moviemanager.configuration;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
 @ConfigurationProperties(prefix = "tmdb")
-public class ConfigProperties {
+public class TmdbConfigProperties {
 
     private String baseUrl;
     private String apiKey;
 
-    public ConfigProperties() {
+    public TmdbConfigProperties() {
     }
 
-    public ConfigProperties(String baseUrl, String apiKey) {
+    public TmdbConfigProperties(String baseUrl, String apiKey) {
         this.baseUrl = baseUrl;
         this.apiKey = apiKey;
     }

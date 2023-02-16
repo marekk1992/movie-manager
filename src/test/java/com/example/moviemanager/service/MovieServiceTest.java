@@ -2,12 +2,13 @@ package com.example.moviemanager.service;
 
 import com.example.moviemanager.repository.MovieRepository;
 import com.example.moviemanager.repository.model.Movie;
-import com.example.moviemanager.service.movieservice.exception.MovieNotFoundException;
-import com.example.moviemanager.service.tmdbmovieservice.TmdbMovieService;
-import com.example.moviemanager.service.tmdbmovieservice.model.FindMovieInfo;
-import com.example.moviemanager.service.tmdbmovieservice.model.MovieType;
+import com.example.moviemanager.service.exception.MovieNotFoundException;
+import com.example.moviemanager.service.model.FindMovieInfo;
+import com.example.moviemanager.service.model.MovieDetails;
+import com.example.moviemanager.service.model.MovieType;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentMatcher;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -19,6 +20,7 @@ import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
@@ -111,10 +113,11 @@ public class MovieServiceTest {
     void saves_movie() {
         // given
         FindMovieInfo findMovieInfo = new FindMovieInfo("HOME ALONE", MovieType.MOVIE, 1990);
-        Movie givenMovie = new Movie("HOME ALONE", "Christmas movie", 1990, 8.5);
+        MovieDetails expectedMovieDetails = new MovieDetails("Christmas Movie", 8.5);
         Movie expectedMovie = new Movie(ID_1, "HOME ALONE", "Christmas movie", 1990, 8.5);
-        when(tmdbMovieService.getMovie(findMovieInfo)).thenReturn(givenMovie);
-        when(movieRepository.save(givenMovie)).thenReturn(expectedMovie);
+        when(tmdbMovieService.getDetails(findMovieInfo)).thenReturn(expectedMovieDetails);
+        when(movieRepository.save(argThat(matchMovieInfoAndDetailsToEntity(findMovieInfo, expectedMovieDetails))))
+                .thenReturn(expectedMovie);
 
         // when
         Movie actualMovie = movieService.save(findMovieInfo);
@@ -150,5 +153,12 @@ public class MovieServiceTest {
         assertThatExceptionOfType(MovieNotFoundException.class)
                 .isThrownBy(() -> movieService.update(ID_1, movie))
                 .withMessage("Update failed. Could not find movie by id - " + ID_1);
+    }
+
+    private ArgumentMatcher<Movie> matchMovieInfoAndDetailsToEntity(FindMovieInfo findMovieInfo, MovieDetails movieDetails) {
+        return movie -> movie.getTitle().equals(findMovieInfo.title()) &&
+                        movie.getDescription().equals(movieDetails.description()) &&
+                        movie.getReleaseYear() == findMovieInfo.releaseYear() &&
+                        movie.getRating() == movieDetails.rating();
     }
 }
