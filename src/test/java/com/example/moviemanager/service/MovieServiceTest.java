@@ -5,6 +5,7 @@ import com.example.moviemanager.repository.model.Movie;
 import com.example.moviemanager.service.exception.MovieNotFoundException;
 import com.example.moviemanager.service.model.FindMovieInfo;
 import com.example.moviemanager.service.model.MovieDetails;
+import com.example.moviemanager.service.model.MovieDetailsResponse;
 import com.example.moviemanager.service.model.MovieType;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -38,7 +39,7 @@ public class MovieServiceTest {
     private MovieRepository movieRepository;
 
     @Mock
-    private TmdbMovieService tmdbMovieService;
+    private TmdbClient tmdbClient;
 
     @InjectMocks
     private MovieService movieService;
@@ -113,10 +114,12 @@ public class MovieServiceTest {
     void saves_movie() {
         // given
         FindMovieInfo findMovieInfo = new FindMovieInfo("HOME ALONE", MovieType.MOVIE, 1990);
-        MovieDetails expectedMovieDetails = new MovieDetails("Christmas Movie", 8.5);
+        MovieDetailsResponse movieDetailsResponse = new MovieDetailsResponse(
+                List.of(new MovieDetails("Christmas Movie", 8.5))
+        );
         Movie expectedMovie = new Movie(ID_1, "HOME ALONE", "Christmas movie", 1990, 8.5);
-        when(tmdbMovieService.getDetails(findMovieInfo)).thenReturn(expectedMovieDetails);
-        when(movieRepository.save(argThat(matchMovieInfoAndDetailsToEntity(findMovieInfo, expectedMovieDetails))))
+        when(tmdbClient.find(findMovieInfo)).thenReturn(movieDetailsResponse);
+        when(movieRepository.save(argThat(matchesMovieInfoAndDetailsToEntity(findMovieInfo, movieDetailsResponse.results().get(0)))))
                 .thenReturn(expectedMovie);
 
         // when
@@ -155,7 +158,7 @@ public class MovieServiceTest {
                 .withMessage("Update failed. Could not find movie by id - " + ID_1);
     }
 
-    private ArgumentMatcher<Movie> matchMovieInfoAndDetailsToEntity(FindMovieInfo findMovieInfo, MovieDetails movieDetails) {
+    private ArgumentMatcher<Movie> matchesMovieInfoAndDetailsToEntity(FindMovieInfo findMovieInfo, MovieDetails movieDetails) {
         return movie -> movie.getTitle().equals(findMovieInfo.title()) &&
                         movie.getDescription().equals(movieDetails.description()) &&
                         movie.getReleaseYear() == findMovieInfo.releaseYear() &&

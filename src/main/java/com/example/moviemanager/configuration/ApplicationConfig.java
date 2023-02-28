@@ -10,6 +10,6 @@ public class ApplicationConfig {
 
     @Bean
     public RestTemplate restTemplate(TmdbConfigProperties configProperties) {
-        return new RestTemplateBuilder().rootUri(configProperties.getBaseUrl()).build();
+        return new RestTemplateBuilder().rootUri(configProperties.baseUrl()).build();
     }
 }

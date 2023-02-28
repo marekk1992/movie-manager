@@ -1,11 +1,8 @@
 package com.example.moviemanager.service;
 
 import com.example.moviemanager.configuration.TmdbConfigProperties;
-import com.example.moviemanager.repository.model.Movie;
 import com.example.moviemanager.service.exception.MovieNotFoundException;
-import com.example.moviemanager.service.exception.UniqueMovieDetailsNotFoundException;
 import com.example.moviemanager.service.model.FindMovieInfo;
-import com.example.moviemanager.service.model.MovieDetails;
 import com.example.moviemanager.service.model.MovieDetailsResponse;
 import com.example.moviemanager.service.model.MovieType;
 import org.springframework.stereotype.Service;
@@ -13,7 +10,7 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
 @Service
-public class TmdbMovieService {
+public class TmdbClient {
 
     private static final String PATH = "/3/search/";
     private static final String QUERY = "query";
@@ -26,15 +23,14 @@ public class TmdbMovieService {
     private final TmdbConfigProperties tmdbConfigProperties;
     private final RestTemplate restTemplate;
 
-    public TmdbMovieService(TmdbConfigProperties tmdbConfigProperties, RestTemplate restTemplate) {
+    public TmdbClient(TmdbConfigProperties tmdbConfigProperties, RestTemplate restTemplate) {
         this.tmdbConfigProperties = tmdbConfigProperties;
         this.restTemplate = restTemplate;
     }
 
-    public MovieDetails getDetails(FindMovieInfo findMovieInfo) {
+    public MovieDetailsResponse find(FindMovieInfo findMovieInfo) {
         String endpoint = buildUri(findMovieInfo);
-        MovieDetailsResponse movieDetailsResponse = getResponse(endpoint);
-        return retrieveMovieDetails(movieDetailsResponse);
+        return getResponse(endpoint);
     }
 
     private String buildUri(FindMovieInfo findMovieInfo) {
@@ -45,34 +41,18 @@ public class TmdbMovieService {
         return UriComponentsBuilder
                 .newInstance()
                 .path(PATH + pathComponent)
-                .queryParam(API_KEY, tmdbConfigProperties.getApiKey())
+                .queryParam(API_KEY, tmdbConfigProperties.apiKey())
                 .queryParam(QUERY, findMovieInfo.title())
                 .queryParam(releaseYear, findMovieInfo.releaseYear())
                 .build()
                 .toUriString();
     }
 
-    private MovieDetailsResponse getResponse(String endpoint) {
+    public MovieDetailsResponse getResponse(String endpoint) {
         MovieDetailsResponse movieDetailsResponse = restTemplate.getForObject(endpoint, MovieDetailsResponse.class);
         if (movieDetailsResponse == null) {
             throw new MovieNotFoundException("Can`t find any movie according to your request.");
         }
         return movieDetailsResponse;
-    }
-
-    private MovieDetails retrieveMovieDetails(MovieDetailsResponse movieDetailsResponse) {
-        if (movieDetailsResponse.results() == null || movieDetailsResponse.results().size() != 1) {
-            throw new UniqueMovieDetailsNotFoundException("Can`t find unique movie according to your request.");
-        }
-        return movieDetailsResponse.results().get(0);
-    }
-
-    private Movie buildMovie(FindMovieInfo findMovieInfo, MovieDetails movieDetails) {
-        return new Movie(
-                findMovieInfo.title(),
-                movieDetails.description(),
-                findMovieInfo.releaseYear(),
-                movieDetails.rating()
-        );
     }
 }

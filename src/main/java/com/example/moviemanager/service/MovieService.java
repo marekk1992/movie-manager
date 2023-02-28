@@ -3,8 +3,10 @@ package com.example.moviemanager.service;
 import com.example.moviemanager.repository.MovieRepository;
 import com.example.moviemanager.repository.model.Movie;
 import com.example.moviemanager.service.exception.MovieNotFoundException;
+import com.example.moviemanager.service.exception.UniqueMovieDetailsNotFoundException;
 import com.example.moviemanager.service.model.FindMovieInfo;
 import com.example.moviemanager.service.model.MovieDetails;
+import com.example.moviemanager.service.model.MovieDetailsResponse;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
 
@@ -15,11 +17,11 @@ import java.util.UUID;
 @Service
 public class MovieService {
 
-    private final TmdbMovieService tmdbMovieService;
+    private final TmdbClient tmdbClient;
     private final MovieRepository movieRepository;
 
-    public MovieService(TmdbMovieService movieDetailsService, MovieRepository movieRepository) {
-        this.tmdbMovieService = movieDetailsService;
+    public MovieService(TmdbClient movieDetailsService, MovieRepository movieRepository) {
+        this.tmdbClient = movieDetailsService;
         this.movieRepository = movieRepository;
     }
 
@@ -41,7 +43,8 @@ public class MovieService {
     }
 
     public Movie save(FindMovieInfo findMovieInfo) {
-        MovieDetails movieDetails = tmdbMovieService.getDetails(findMovieInfo);
+        MovieDetailsResponse movieDetailsResponse = tmdbClient.find(findMovieInfo);
+        MovieDetails movieDetails = retrieveMovieDetails(movieDetailsResponse);
         Movie createdMovie = new Movie(
                 findMovieInfo.title(),
                 movieDetails.description(),
@@ -60,5 +63,12 @@ public class MovieService {
         movie.setId(id);
 
         return movieRepository.save(movie);
+    }
+
+    private MovieDetails retrieveMovieDetails(MovieDetailsResponse movieDetailsResponse) {
+        if (movieDetailsResponse.results() == null || movieDetailsResponse.results().size() != 1) {
+            throw new UniqueMovieDetailsNotFoundException("Can`t find unique movie according to your request.");
+        }
+        return movieDetailsResponse.results().get(0);
     }
 }

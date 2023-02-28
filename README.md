@@ -56,4 +56,5 @@ Now you could open your API client tool or web browser and test application.
 - Mockito;
 - JUnit;
 - Flyway;
-- Testcontainers.
+- Testcontainers;
+- WireMock.
