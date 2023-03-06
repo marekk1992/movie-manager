@@ -1,7 +1,6 @@
 package com.example.moviemanager.service;
 
 import com.example.moviemanager.configuration.TmdbConfigProperties;
-import com.example.moviemanager.service.exception.MovieNotFoundException;
 import com.example.moviemanager.service.model.FindMovieInfo;
 import com.example.moviemanager.service.model.MovieDetailsResponse;
 import com.example.moviemanager.service.model.MovieType;
@@ -28,9 +27,9 @@ public class TmdbClient {
         this.restTemplate = restTemplate;
     }
 
-    public MovieDetailsResponse find(FindMovieInfo findMovieInfo) {
+    public MovieDetailsResponse findMovies(FindMovieInfo findMovieInfo) {
         String endpoint = buildUri(findMovieInfo);
-        return getResponse(endpoint);
+        return restTemplate.getForObject(endpoint, MovieDetailsResponse.class);
     }
 
     private String buildUri(FindMovieInfo findMovieInfo) {
@@ -46,13 +45,5 @@ public class TmdbClient {
                 .queryParam(releaseYear, findMovieInfo.releaseYear())
                 .build()
                 .toUriString();
-    }
-
-    public MovieDetailsResponse getResponse(String endpoint) {
-        MovieDetailsResponse movieDetailsResponse = restTemplate.getForObject(endpoint, MovieDetailsResponse.class);
-        if (movieDetailsResponse == null) {
-            throw new MovieNotFoundException("Can`t find any movie according to your request.");
-        }
-        return movieDetailsResponse;
     }
 }

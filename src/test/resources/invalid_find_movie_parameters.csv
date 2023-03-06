@@ -1,3 +1,3 @@
-title, type, releaseYear
-Game Alone, MOVIE, 1999
-Name of Thrones, TV_SHOW, 1999
+title, type, releaseYear, url
+GAME ALONE, MOVIE, 1999, /3/search/movie?api_key=43d5d872d7dc32845ab997b8v25987f7&query=GAME%20ALONE&year=1999
+NAME OF THRONES, TV_SHOW, 1999, /3/search/tv?api_key=43d5d872d7dc32845ab997b8v25987f7&query=NAME%20OF%20THRONES&first_air_date_year=1999

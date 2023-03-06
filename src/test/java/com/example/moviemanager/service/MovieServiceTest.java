@@ -3,6 +3,7 @@ package com.example.moviemanager.service;
 import com.example.moviemanager.repository.MovieRepository;
 import com.example.moviemanager.repository.model.Movie;
 import com.example.moviemanager.service.exception.MovieNotFoundException;
+import com.example.moviemanager.service.exception.UniqueMovieDetailsNotFoundException;
 import com.example.moviemanager.service.model.FindMovieInfo;
 import com.example.moviemanager.service.model.MovieDetails;
 import com.example.moviemanager.service.model.MovieDetailsResponse;
@@ -15,6 +16,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.dao.EmptyResultDataAccessException;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -118,8 +120,10 @@ public class MovieServiceTest {
                 List.of(new MovieDetails("Christmas Movie", 8.5))
         );
         Movie expectedMovie = new Movie(ID_1, "HOME ALONE", "Christmas movie", 1990, 8.5);
-        when(tmdbClient.find(findMovieInfo)).thenReturn(movieDetailsResponse);
-        when(movieRepository.save(argThat(matchesMovieInfoAndDetailsToEntity(findMovieInfo, movieDetailsResponse.results().get(0)))))
+        when(tmdbClient.findMovies(findMovieInfo)).thenReturn(movieDetailsResponse);
+        when(movieRepository.save(
+                argThat(matchesMovieInfoAndDetailsToEntity(findMovieInfo, movieDetailsResponse.results().get(0)))
+        ))
                 .thenReturn(expectedMovie);
 
         // when
@@ -128,6 +132,36 @@ public class MovieServiceTest {
         // then
         assertThat(actualMovie)
                 .isEqualTo(expectedMovie);
+    }
+
+    @Test
+    void throws_exception_when_trying_to_save_non_existing_movie() {
+        // given
+        FindMovieInfo findMovieInfo = new FindMovieInfo("GAME ALONE", MovieType.MOVIE, 1990);
+        MovieDetailsResponse movieDetailsResponse = new MovieDetailsResponse(Collections.emptyList());
+        when(tmdbClient.findMovies(findMovieInfo)).thenReturn(movieDetailsResponse);
+
+        // then
+        assertThatExceptionOfType(MovieNotFoundException.class)
+                .isThrownBy(() -> movieService.save(findMovieInfo))
+                .withMessage("Saving failed. Can`t find any movie according to your request.");
+    }
+
+    @Test
+    void throws_exception_when_movie_details_response_contains_more_than_one_movie() {
+        // given
+        FindMovieInfo findMovieInfo = new FindMovieInfo("HOME ALONE", MovieType.MOVIE, 1990);
+        MovieDetailsResponse movieDetailsResponse = new MovieDetailsResponse(
+                List.of(new MovieDetails("Christmas Movie", 8.5),
+                        new MovieDetails("Christmas Movie 2", 8.5)
+                )
+        );
+        when(tmdbClient.findMovies(findMovieInfo)).thenReturn(movieDetailsResponse);
+
+        // then
+        assertThatExceptionOfType(UniqueMovieDetailsNotFoundException.class)
+                .isThrownBy(() -> movieService.save(findMovieInfo))
+                .withMessage("Saving failed. Can`t find unique movie according to your request.");
     }
 
     @Test

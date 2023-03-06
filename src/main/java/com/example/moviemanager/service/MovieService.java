@@ -43,7 +43,7 @@ public class MovieService {
     }
 
     public Movie save(FindMovieInfo findMovieInfo) {
-        MovieDetailsResponse movieDetailsResponse = tmdbClient.find(findMovieInfo);
+        MovieDetailsResponse movieDetailsResponse = tmdbClient.findMovies(findMovieInfo);
         MovieDetails movieDetails = retrieveMovieDetails(movieDetailsResponse);
         Movie createdMovie = new Movie(
                 findMovieInfo.title(),
@@ -66,8 +66,10 @@ public class MovieService {
     }
 
     private MovieDetails retrieveMovieDetails(MovieDetailsResponse movieDetailsResponse) {
-        if (movieDetailsResponse.results() == null || movieDetailsResponse.results().size() != 1) {
-            throw new UniqueMovieDetailsNotFoundException("Can`t find unique movie according to your request.");
+        if (movieDetailsResponse.results().isEmpty()) {
+            throw new MovieNotFoundException("Saving failed. Can`t find any movie according to your request.");
+        } else if (movieDetailsResponse.results().size() != 1) {
+            throw new UniqueMovieDetailsNotFoundException("Saving failed. Can`t find unique movie according to your request.");
         }
         return movieDetailsResponse.results().get(0);
     }
