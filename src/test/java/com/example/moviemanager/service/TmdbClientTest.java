@@ -28,11 +28,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 public class TmdbClientTest {
 
-    private static final String TV_SHOWS_URL = "/3/search/tv?api_key=43d5d872d7dc32845ab997b8v25987f7" +
-                                               "&query=GAME%20OF%20THRONES&first_air_date_year=2011";
-    private static final String MOVIES_URL = "/3/search/movie?api_key=43d5d872d7dc32845ab997b8v25987f7" +
-                                             "&query=HOME%20ALONE&year=1990";
-
     private static final WireMockServer wireMockServer = new WireMockServer(0);
 
     private final TmdbConfigProperties tmdbConfigProperties =
@@ -60,7 +55,9 @@ public class TmdbClientTest {
         FindMovieInfo findMovieInfo = new FindMovieInfo("GAME OF THRONES", MovieType.TV_SHOW, 2011);
         MovieDetailsResponse expectedMovieDetailsResponse =
                 new MovieDetailsResponse(List.of(new MovieDetails("GOT Tv-show.", 8.4)));
-        wireMockServer.stubFor(get(TV_SHOWS_URL)
+        String tvShowsUrl = "/3/search/tv?api_key=43d5d872d7dc32845ab997b8v25987f7" +
+                              "&query=GAME%20OF%20THRONES&first_air_date_year=2011";
+        wireMockServer.stubFor(get(tvShowsUrl)
                 .willReturn(aResponse()
                         .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                         .withStatus(HttpStatus.OK.value())
@@ -81,7 +78,9 @@ public class TmdbClientTest {
         FindMovieInfo findMovieInfo = new FindMovieInfo("HOME ALONE", MovieType.MOVIE, 1990);
         MovieDetailsResponse expectedMovieDetailsResponse =
                 new MovieDetailsResponse(List.of(new MovieDetails("Christmas movie", 7.4)));
-        wireMockServer.stubFor(get(MOVIES_URL)
+        String moviesUrl = "/3/search/movie?api_key=43d5d872d7dc32845ab997b8v25987f7" +
+                            "&query=HOME%20ALONE&year=1990";
+        wireMockServer.stubFor(get(moviesUrl)
                 .willReturn(aResponse()
                         .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                         .withStatus(HttpStatus.OK.value())
