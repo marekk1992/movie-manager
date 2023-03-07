@@ -1,4 +1,4 @@
-package com.example.moviemanager.controller.dto;
+package com.example.moviemanager.controller.model;
 
 import com.example.moviemanager.repository.model.Movie;
 

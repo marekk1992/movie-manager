@@ -3,19 +3,27 @@ package com.example.moviemanager.service;
 import com.example.moviemanager.repository.MovieRepository;
 import com.example.moviemanager.repository.model.Movie;
 import com.example.moviemanager.service.exception.MovieNotFoundException;
+import com.example.moviemanager.service.exception.UniqueMovieDetailsNotFoundException;
+import com.example.moviemanager.service.model.FindMovieInfo;
+import com.example.moviemanager.service.model.MovieDetails;
+import com.example.moviemanager.service.model.MovieDetailsResponse;
+import com.example.moviemanager.service.model.MovieType;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentMatcher;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.dao.EmptyResultDataAccessException;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
@@ -32,6 +40,9 @@ public class MovieServiceTest {
     @Mock
     private MovieRepository movieRepository;
 
+    @Mock
+    private TmdbClient tmdbClient;
+
     @InjectMocks
     private MovieService movieService;
 
@@ -39,8 +50,8 @@ public class MovieServiceTest {
     void returns_collection_of_movies() {
         // given
         List<Movie> expectedMovies = List.of(
-                new Movie(ID_1, "Home Alone", "Christmas movie", 1990, 8.5),
-                new Movie(ID_2, "Home Alone 2", "Christmas movie", 1992, 8.9)
+                new Movie(ID_1, "HOME ALONE", "Christmas movie", 1990, 8.5),
+                new Movie(ID_2, "HOME ALONE 2", "Christmas movie", 1992, 8.9)
         );
         when(movieRepository.findAll()).thenReturn(expectedMovies);
 
@@ -55,7 +66,7 @@ public class MovieServiceTest {
     @Test
     void finds_movie_by_id() {
         // given
-        Movie expectedMovie = new Movie(ID_1, "Home Alone", "Christmas movie", 1990, 8.5);
+        Movie expectedMovie = new Movie(ID_1, "HOME ALONE", "Christmas movie", 1990, 8.5);
         when(movieRepository.findById(ID_1)).thenReturn(Optional.of(expectedMovie));
 
         // when
@@ -104,12 +115,19 @@ public class MovieServiceTest {
     @Test
     void saves_movie() {
         // given
-        Movie givenMovie = new Movie("Home Alone", "Christmas movie", 1990, 8.5);
-        Movie expectedMovie = new Movie(ID_1, "Home Alone", "Christmas movie", 1990, 8.5);
-        when(movieRepository.save(givenMovie)).thenReturn(expectedMovie);
+        FindMovieInfo findMovieInfo = new FindMovieInfo("HOME ALONE", MovieType.MOVIE, 1990);
+        MovieDetailsResponse movieDetailsResponse = new MovieDetailsResponse(
+                List.of(new MovieDetails("Christmas Movie", 8.5))
+        );
+        Movie expectedMovie = new Movie(ID_1, "HOME ALONE", "Christmas movie", 1990, 8.5);
+        when(tmdbClient.findMovies(findMovieInfo)).thenReturn(movieDetailsResponse);
+        when(movieRepository.save(
+                argThat(matchesMovieInfoAndDetailsToEntity(findMovieInfo, movieDetailsResponse.results().get(0)))
+        ))
+                .thenReturn(expectedMovie);
 
         // when
-        Movie actualMovie = movieService.save(givenMovie);
+        Movie actualMovie = movieService.save(findMovieInfo);
 
         // then
         assertThat(actualMovie)
@@ -117,11 +135,41 @@ public class MovieServiceTest {
     }
 
     @Test
+    void throws_exception_when_trying_to_save_non_existing_movie() {
+        // given
+        FindMovieInfo findMovieInfo = new FindMovieInfo("GAME ALONE", MovieType.MOVIE, 1990);
+        MovieDetailsResponse movieDetailsResponse = new MovieDetailsResponse(Collections.emptyList());
+        when(tmdbClient.findMovies(findMovieInfo)).thenReturn(movieDetailsResponse);
+
+        // then
+        assertThatExceptionOfType(MovieNotFoundException.class)
+                .isThrownBy(() -> movieService.save(findMovieInfo))
+                .withMessage("Saving failed. Can`t find any movie according to your request.");
+    }
+
+    @Test
+    void throws_exception_when_movie_details_response_contains_more_than_one_movie() {
+        // given
+        FindMovieInfo findMovieInfo = new FindMovieInfo("HOME ALONE", MovieType.MOVIE, 1990);
+        MovieDetailsResponse movieDetailsResponse = new MovieDetailsResponse(
+                List.of(new MovieDetails("Christmas Movie", 8.5),
+                        new MovieDetails("Christmas Movie 2", 8.5)
+                )
+        );
+        when(tmdbClient.findMovies(findMovieInfo)).thenReturn(movieDetailsResponse);
+
+        // then
+        assertThatExceptionOfType(UniqueMovieDetailsNotFoundException.class)
+                .isThrownBy(() -> movieService.save(findMovieInfo))
+                .withMessage("Saving failed. Can`t find unique movie according to your request.");
+    }
+
+    @Test
     void updates_movie_by_id_with_provided_data() {
         // given
         when(movieRepository.findById(ID_1))
-                .thenReturn(Optional.of(new Movie(ID_1, "Home Alone 2", "Comedy", 1992, 9.0)));
-        Movie expectedMovie = new Movie(ID_1, "Home Alone", "Christmas movie", 1990, 8.5);
+                .thenReturn(Optional.of(new Movie(ID_1, "HOME ALONE 2", "Comedy", 1992, 9.0)));
+        Movie expectedMovie = new Movie(ID_1, "HOME ALONE", "Christmas movie", 1990, 8.5);
         when(movieRepository.save(expectedMovie)).thenReturn(expectedMovie);
 
         // when
@@ -135,12 +183,19 @@ public class MovieServiceTest {
     @Test
     void throws_exception_when_trying_to_update_non_existing_movie() {
         // given
-        Movie movie = new Movie("Home Alone", "Christmas movie", 1990, 8.5);
+        Movie movie = new Movie("HOME ALONE", "Christmas movie", 1990, 8.5);
         when(movieRepository.findById(ID_1)).thenReturn(Optional.empty());
 
         // then
         assertThatExceptionOfType(MovieNotFoundException.class)
                 .isThrownBy(() -> movieService.update(ID_1, movie))
                 .withMessage("Update failed. Could not find movie by id - " + ID_1);
+    }
+
+    private ArgumentMatcher<Movie> matchesMovieInfoAndDetailsToEntity(FindMovieInfo findMovieInfo, MovieDetails movieDetails) {
+        return movie -> movie.getTitle().equals(findMovieInfo.title()) &&
+                        movie.getDescription().equals(movieDetails.description()) &&
+                        movie.getReleaseYear() == findMovieInfo.releaseYear() &&
+                        movie.getRating() == movieDetails.rating();
     }
 }

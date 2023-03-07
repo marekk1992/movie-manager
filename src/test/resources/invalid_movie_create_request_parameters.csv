@@ -1,0 +1,4 @@
+title, type, releaseYear, errorMessage
+, MOVIE, 1995, Title is mandatory.
+Title, , 1995, Movie type is mandatory. Usage: 'MOVIE' or 'TVSHOW'.
+Title, MOVIE, 1887, First official movie was released in 1888, please check your input.

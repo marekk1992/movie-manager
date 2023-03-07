@@ -1,8 +1,12 @@
 package com.example.moviemanager.service;
 
-import com.example.moviemanager.service.exception.MovieNotFoundException;
-import com.example.moviemanager.repository.model.Movie;
 import com.example.moviemanager.repository.MovieRepository;
+import com.example.moviemanager.repository.model.Movie;
+import com.example.moviemanager.service.exception.MovieNotFoundException;
+import com.example.moviemanager.service.exception.UniqueMovieDetailsNotFoundException;
+import com.example.moviemanager.service.model.FindMovieInfo;
+import com.example.moviemanager.service.model.MovieDetails;
+import com.example.moviemanager.service.model.MovieDetailsResponse;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
 
@@ -13,9 +17,11 @@ import java.util.UUID;
 @Service
 public class MovieService {
 
+    private final TmdbClient tmdbClient;
     private final MovieRepository movieRepository;
 
-    public MovieService(MovieRepository movieRepository) {
+    public MovieService(TmdbClient movieDetailsService, MovieRepository movieRepository) {
+        this.tmdbClient = movieDetailsService;
         this.movieRepository = movieRepository;
     }
 
@@ -36,8 +42,17 @@ public class MovieService {
         }
     }
 
-    public Movie save(Movie movie) {
-        return movieRepository.save(movie);
+    public Movie save(FindMovieInfo findMovieInfo) {
+        MovieDetailsResponse movieDetailsResponse = tmdbClient.findMovies(findMovieInfo);
+        MovieDetails movieDetails = retrieveMovieDetails(movieDetailsResponse);
+        Movie createdMovie = new Movie(
+                findMovieInfo.title(),
+                movieDetails.description(),
+                findMovieInfo.releaseYear(),
+                movieDetails.rating()
+        );
+
+        return movieRepository.save(createdMovie);
     }
 
     public Movie update(UUID id, Movie movie) {
@@ -48,5 +63,14 @@ public class MovieService {
         movie.setId(id);
 
         return movieRepository.save(movie);
+    }
+
+    private MovieDetails retrieveMovieDetails(MovieDetailsResponse movieDetailsResponse) {
+        if (movieDetailsResponse.results().isEmpty()) {
+            throw new MovieNotFoundException("Saving failed. Can`t find any movie according to your request.");
+        } else if (movieDetailsResponse.results().size() != 1) {
+            throw new UniqueMovieDetailsNotFoundException("Saving failed. Can`t find unique movie according to your request.");
+        }
+        return movieDetailsResponse.results().get(0);
     }
 }
