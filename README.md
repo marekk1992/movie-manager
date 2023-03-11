@@ -15,20 +15,17 @@ Before running this API, I assume that you have successfully installed the follo
 - Git - for cloning repository from GitHub;
 - Maven - for building and running project from terminal;
 - JDK - required for Maven compilation;
-- Docker - for running 'postgres' image;
-- API client tool (e.g. Postman) or browser - for testing your API;
+- Docker - for deploying application;
+- Docker-compose - for running multi-container Docker applications;
+- API client tool (e.g. Postman) or browser - for testing your API.
 
-`Step 1` - in your terminal window start Postgres instance and docker container:
+`Step 1` - start docker postgres container:
 
-    $ docker run -it --name my_database -p 5432:5432 -e POSTGRES_USER=movieuser -e POSTGRES_PASSWORD=postgres123 postgres
+Navigate to root of the project and execute command:
 
-*Notes
-- Container name - my_database;
-- Image - postgres;
-- In PostgreSQL it is typical to use port 5432;
-- PostgreSQL version - 15.1.
+    $ docker-compose up -d
 
-Now your database system is ready to accept connections.
+This will start PostgreSQL container in the background, your database system is ready to accept connections.
 
 `Step 2` - indicate your own API KEY for integration with TMDB:
 
@@ -53,6 +50,7 @@ Now you could open your API client tool or web browser and test application.
 - SpringBoot;
 - Spring Data Rest;
 - PostgreSQL;
+- Docker-compose;
 - Mockito;
 - JUnit;
 - Flyway;

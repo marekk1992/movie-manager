@@ -1,0 +1,17 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15.1
+    restart: always
+    environment:
+      - POSTGRES_USER=movieuser
+      - POSTGRES_PASSWORD=postgres123
+    ports:
+      - '5432:5432'
+    volumes:
+      - db:/var/lib/postgresql/data
+
+volumes:
+  db:
+    driver: local
