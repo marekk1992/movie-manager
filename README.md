@@ -13,36 +13,29 @@ API integrates with _TMDB - The Movie Database_ for retrieving movies and tv-sho
 ## 2. How to run this API
 Before running this API, I assume that you have successfully installed the following tools on your computer:
 - Git - for cloning repository from GitHub;
-- Maven - for building and running project from terminal;
+- Maven - for building project;
 - JDK - required for Maven compilation;
-- Docker - for running 'postgres' image;
-- API client tool (e.g. Postman) or browser - for testing your API;
+- Docker - for deploying application;
+- Docker-compose - for running multi-container Docker applications;
+- API client tool (e.g. Postman) or browser - for testing your API.
 
-`Step 1` - in your terminal window start Postgres instance and docker container:
-
-    $ docker run -it --name my_database -p 5432:5432 -e POSTGRES_USER=movieuser -e POSTGRES_PASSWORD=postgres123 postgres
-
-*Notes
-- Container name - my_database;
-- Image - postgres;
-- In PostgreSQL it is typical to use port 5432;
-- PostgreSQL version - 15.1.
-
-Now your database system is ready to accept connections.
-
-`Step 2` - indicate your own API KEY for integration with TMDB:
+`Step 1` - indicate your own API KEY for integration with TMDB:
 
 Generate your own API KEY on https://www.themoviedb.org/ website and insert it into application's properties file `src/main/resources/application.yml`:
-    
-`tmdb:apiKey:` your key
 
-`Step 3` - run API.
+`tmdb:apiKey: your_key`
+
+`Step 2` - build docker image:
 
 Navigate to root of the project and execute command:
 
-    $ mvn spring-boot:run
+    $ mvn spring-boot:build-image
 
-Now you could open your API client tool or web browser and test application.
+`Step 3` - start your project`s services:
+
+    $ docker-compose up -d
+
+This will start PostgreSQL and application services in the background.
 
 *This REST API is test covered. You could run tests by executing command:
 
@@ -53,6 +46,7 @@ Now you could open your API client tool or web browser and test application.
 - SpringBoot;
 - Spring Data Rest;
 - PostgreSQL;
+- Docker-compose;
 - Mockito;
 - JUnit;
 - Flyway;
