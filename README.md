@@ -25,9 +25,13 @@ Generate your own API KEY on https://www.themoviedb.org/ website and insert it i
 
 `tmdb:apiKey: your_key`
 
-`Step 2` - start you project services:
+`Step 2` - build docker image:
 
 Navigate to root of the project and execute command:
+
+    $ mvn spring-boot:build-image
+
+`Step 3` - start your project`s services:
 
     $ docker-compose up -d
 
