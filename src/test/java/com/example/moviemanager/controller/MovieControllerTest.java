@@ -73,16 +73,12 @@ public class MovieControllerTest {
                            {
                               "movies": [
                                   {
-                                      "id":926e09f7-3c78-469d-bdbc-2d34d314c1b4,
                                       "title":"HOME ALONE",
-                                      "description":"Christmas movie",
                                       "releaseYear":1990,
                                       "rating":8.5
                                   },
                                   {
-                                      "id":2d88924f-0f63-4280-9e58-a9a126049273,
                                       "title":"HOME ALONE 2",
-                                      "description":"Christmas movie",
                                       "releaseYear":1992,
                                       "rating":8.9
                                   }
@@ -159,7 +155,7 @@ public class MovieControllerTest {
 
     @ParameterizedTest
     @CsvFileSource(resources = "/invalid_movie_create_request_parameters.csv", numLinesToSkip = 1)
-    void returns_505_response_when_user_input_validation_for_creating_movie_is_failed(
+    void returns_500_response_when_user_input_validation_for_creating_movie_is_failed(
             String title, MovieType type, int releaseYear, String message
     ) throws Exception {
         // given
@@ -207,7 +203,7 @@ public class MovieControllerTest {
 
     @ParameterizedTest
     @CsvFileSource(resources = "/invalid_movie_update_request_parameters.csv", numLinesToSkip = 1)
-    void returns_505_response_when_user_input_validation_for_updating_movie_is_failed(
+    void returns_500_response_when_user_input_validation_for_updating_movie_is_failed(
             String title, String description, int releaseYear, double rating, String message
     ) throws Exception {
         // given
@@ -222,7 +218,6 @@ public class MovieControllerTest {
                 .andExpect(content().string(containsString(message)));
     }
 
-    // TODO
     @Test
     void returns_404_response_when_trying_to_update_non_existing_movie() throws Exception {
         // given

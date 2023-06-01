@@ -1,3 +1,13 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/postgres?currentSchema=movie_directory
+    username: movieuser
+    password: postgres123
+  jpa:
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+
 tmdb:
   baseUrl: https://api.themoviedb.org
   apiKey:
