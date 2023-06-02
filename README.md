@@ -21,7 +21,8 @@ Before running this API, I assume that you have successfully installed the follo
 
 `Step 1` - indicate your own API KEY for integration with TMDB:
 
-Generate your own API KEY on https://www.themoviedb.org/ website and insert it into application's properties file `src/main/resources/application.yml`:
+Generate your own API KEY on https://www.themoviedb.org/ website 
+and insert it into application's properties file `src/main/resources/application.yml`:
 
 `tmdb:apiKey: your_key`
 
@@ -37,9 +38,15 @@ Navigate to root of the project and execute command:
 
 This will start PostgreSQL and application services in the background.
 
-*This REST API is test covered. You could run tests by executing command:
+`*Notes`:
+
+1 - This REST API is test covered. You could run tests by executing command:
 
     $ mvn clean test
+
+2 - If REST API will be used with UI application you should enable 
+Cross-Origin Resource Sharing (CORS) by uncommenting `@CrossOrigin` annotation 
+in controller `src/main/java/com/example/moviemanager/controller/MovieController.java`.
 
 ## 3. Technologies and Frameworks
 

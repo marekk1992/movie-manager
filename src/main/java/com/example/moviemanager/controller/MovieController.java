@@ -2,7 +2,7 @@ package com.example.moviemanager.controller;
 
 import com.example.moviemanager.controller.model.CreateMovieRequest;
 import com.example.moviemanager.controller.model.MovieCollectionResponse;
-import com.example.moviemanager.controller.model.MovieResponse;
+import com.example.moviemanager.controller.model.MovieDetailsResponse;
 import com.example.moviemanager.controller.model.UpdateMovieRequest;
 import com.example.moviemanager.service.MovieService;
 import jakarta.validation.Valid;
@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.UUID;
 
 @RestController
+//@CrossOrigin(origins = "http://localhost:4200")
 @RequestMapping("/v1/movies")
 public class MovieController {
 
@@ -35,19 +36,19 @@ public class MovieController {
     }
 
     @GetMapping("/{movieId}")
-    public MovieResponse findById(@PathVariable UUID movieId) {
-        return MovieResponse.fromEntity(movieService.findById(movieId));
+    public MovieDetailsResponse findById(@PathVariable UUID movieId) {
+        return MovieDetailsResponse.fromEntity(movieService.findById(movieId));
     }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public MovieResponse addMovie(@Valid @RequestBody CreateMovieRequest request) {
-        return MovieResponse.fromEntity(movieService.save(request.toFindMovieInfo()));
+    public MovieDetailsResponse addMovie(@Valid @RequestBody CreateMovieRequest request) {
+        return MovieDetailsResponse.fromEntity(movieService.save(request.toFindMovieInfo()));
     }
 
     @PutMapping("/{movieId}")
-    public MovieResponse updateMovie(@Valid @RequestBody UpdateMovieRequest request, @PathVariable UUID movieId) {
-        return MovieResponse.fromEntity(movieService.update(movieId, request.toEntity()));
+    public MovieDetailsResponse updateMovie(@Valid @RequestBody UpdateMovieRequest request, @PathVariable UUID movieId) {
+        return MovieDetailsResponse.fromEntity(movieService.update(movieId, request.toEntity()));
     }
 
     @DeleteMapping("/{movieId}")
